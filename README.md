@@ -1,3 +1,4 @@
+**NOTE: avoid src forlder it is previous implementation**
 # MeshGPT: 3D Shape Generation via VQ-VAE and Discrete Diffusion
 
 Two-stage generative model for 3D shapes using Vector Quantization and Score-matching Discrete Diffusion.
@@ -8,12 +9,91 @@ This repository contains:
 1. **MeshGPT VQ-VAE** (`mesh_vqvae/`) - Autoencoder for 3D meshes with discrete latent codes
 2. **SEDD Diffusion** (`diffusion_model/`) - Discrete diffusion model for generating latent codes
 
-## Pipeline
+## Explanation
 
-```
-3D Mesh → MeshGPT Encoder → Discrete Codes → SEDD Diffusion → New Codes → MeshGPT Decoder → New 3D Mesh
-```
+```sh
+╔═════════════════════════════════════════════════════════════════════════════════╗
+║                           STAGE 1: MESHGPT VQ-VAE TRAINING                      ║
+╚═════════════════════════════════════════════════════════════════════════════════╝
 
+3D Mesh (ModelNet40)                    MeshGPT VQ-VAE                    Reconstructed Mesh
+┌─────────────────┐                      ┌─────────────────┐                ┌─────────────────┐
+│  • Points       │ ──► Encode ───────►  │  Encoder        │──► Quantize ──►│  Decoder        │ ──► Output
+│  • Normals      │                      │  PointNet-style │                │  Occupancy      │
+│  • Curvature    │                      │  → [4096, 64]   │                │  Prediction     │
+│  • Query Pts    │                      │                 │                │                 │
+│  • Occupancy    │                      │                 │                │                 │
+└─────────────────┘                      └─────────────────┘                └─────────────────┘
+       │                                         │                                 │
+       │                                         ▼                                 ▼
+       │                                 ┌─────────────────┐                ┌─────────────────┐
+       │                                 │ Vector Quantizer│                │  IoU: 0.38-0.42 │
+       │                                 │ 256 entries     │                │  Loss: recon+vq │
+       │                                 │ [64-dim each]   │                │                 │
+       │                                 └─────────────────┘                └─────────────────┘
+       │                                         │
+       │                                         ▼
+       │                                 ┌─────────────────┐
+       └────────────────────────────────►│ Codebook Indices│
+                                         │ [4096] tokens   │
+                                         │ Values: 0-255   │
+                                         └─────────────────┘
+
+╔═════════════════════════════════════════════════════════════════════════════════╗
+║                           STAGE 2: SEDD DIFFUSION TRAINING                      ║
+╚═════════════════════════════════════════════════════════════════════════════════╝
+
+Codebook Indices                    SEDD Transformer                      Generated Indices
+┌─────────────────┐                  ┌─────────────────┐                  ┌─────────────────┐
+│ Real Codes      │ ──► Add Noise──► │  Transformer    │ ──► Predict ───► │  Predicted      │
+│ [B, 4096]       │                  │  d_model=512    │                  │  Codes          │
+│ Values: 0-255   │                  │  num_layers=6   │                  │  [B, 4096]      │
+│                 │                  │  nhead=8        │                  │  Values: 0-255  │
+└─────────────────┘                  └─────────────────┘                  └─────────────────┘
+       │                                         │                                 │
+       │                                         ▼                                 ▼
+       │                                 ┌─────────────────┐                ┌─────────────────┐
+       │                                 │ Embeddings:     │                │  Overlap: 90%   │
+       │                                 │ • Token:[257,512]│               │  Val Loss: 1.9  │
+       │                                 │ • Position      │                │                 │
+       │                                 │ • Time          │                │                 │
+       │                                 │ • Class (opt)   │                │                 │
+       │                                 └─────────────────┘                └─────────────────┘
+       │                                         │
+       │                                         ▼
+       │                                 ┌─────────────────┐
+       └───────────────────────────────► │ Diffusion Process│
+                                         │ t=0: clean      │
+                                         │ t=500: 50% mask │
+                                         │ t=1000: all mask│
+                                         └─────────────────┘
+
+╔═════════════════════════════════════════════════════════════════════════════════╗
+║                           STAGE 3: GENERATION & DECODING                        ║
+╚═════════════════════════════════════════════════════════════════════════════════╝
+
+Generated Codes                      MeshGPT Decoder                     Final 3D Mesh
+┌─────────────────┐                  ┌─────────────────┐                  ┌─────────────────┐
+│ SEDD Output     │ ──► Lookup ────► │  Decoder        │ ──► Reconstruct ─► │  Generated    │
+│ [4096] tokens   │                  │  Pre-trained    │                  │  3D Shape       │
+│ Values: 0-255   │                  │  from Stage 1   │                  │  • Occupancy    │
+│                 │                  │                 │                  │  • Geometry     │
+└─────────────────┘                  └─────────────────┘                  └─────────────────┘
+       │                                         │                                 │
+       │                                         ▼                                 ▼
+       │                                 ┌─────────────────┐                ┌─────────────────┐
+       │                                 │ Codebook Lookup │                │  New Mesh       │
+       │                                 │ Get 64-dim      │                │  Never seen     │
+       │                                 │ embeddings      │                │  before!        │
+       │                                 └─────────────────┘                └─────────────────┘
+       │                                         │
+       │                                         ▼
+       │                                 ┌─────────────────┐
+       └────────────────────────────────►│ Continuous      │
+                                         │ Features        │
+                                         │ [4096, 64]      │
+                                         └─────────────────┘
+```
 ## Quick Start
 
 ### 1. Train MeshGPT VQ-VAE
@@ -156,24 +236,3 @@ Models are trained on **ModelNet40**:
 - 2720 training samples
 - 480 validation samples
 - Point cloud + occupancy representation
-
-## Citation
-
-If you use this code, please cite:
-```bibtex
-@software{meshgpt_vqvae_sedd,
-  title={MeshGPT: 3D Shape Generation via VQ-VAE and Discrete Diffusion},
-  author={Your Name},
-  year={2026}
-}
-```
-
-## License
-
-[Specify your license here]
-
-## Acknowledgments
-
-- MeshGPT architecture inspired by VQ-VAE principles
-- SEDD implementation based on score-matching discrete diffusion
-- Trained on ModelNet40 dataset
