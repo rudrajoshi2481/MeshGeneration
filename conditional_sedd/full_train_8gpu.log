@@ -1,0 +1,1393 @@
+Using bfloat16 Automatic Mixed Precision (AMP)
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/pytorch_lightning/trainer/connectors/logger_connector/logger_connector.py:67: UserWarning: Starting from v1.9.0, `tensorboardX` has been removed as a dependency of the `pytorch_lightning` package, due to potential conflicts with other packages in the ML ecosystem. For this reason, `logger=True` will use `CSVLogger` as the default logger, unless the `tensorboard` or `tensorboardX` packages are found. Please `pip install lightning[extra]` or one of them to enable TensorBoard support by default
+  warning_cache.warn(
+Initializing distributed: GLOBAL_RANK: 0, MEMBER: 1/8
+Initializing distributed: GLOBAL_RANK: 4, MEMBER: 5/8
+Initializing distributed: GLOBAL_RANK: 2, MEMBER: 3/8
+Initializing distributed: GLOBAL_RANK: 3, MEMBER: 4/8
+Initializing distributed: GLOBAL_RANK: 5, MEMBER: 6/8
+Initializing distributed: GLOBAL_RANK: 7, MEMBER: 8/8
+Initializing distributed: GLOBAL_RANK: 1, MEMBER: 2/8
+Initializing distributed: GLOBAL_RANK: 6, MEMBER: 7/8
+----------------------------------------------------------------------------------------------------
+distributed_backend=nccl
+All distributed processes registered. Starting with 8 processes
+----------------------------------------------------------------------------------------------------
+
+You are using a CUDA device ('NVIDIA A100-SXM4-80GB') that has Tensor Cores. To properly utilize them, you should set `torch.set_float32_matmul_precision('medium' | 'high')` which will trade-off precision for performance. For more details, read https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html#torch.set_float32_matmul_precision
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 7 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 4 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 2 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 1 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 6 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 3 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 5 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+
+  | Name              | Type                  | Params
+------------------------------------------------------------
+0 | noise_schedule    | DiscreteNoiseSchedule | 0     
+1 | token_embedding   | Embedding             | 152 K 
+2 | pos_encoder       | PositionalEncoding    | 0     
+3 | time_embedding    | TimeEmbedding         | 263 K 
+4 | transformer       | TransformerEncoder    | 18.9 M
+5 | output_projection | Linear                | 131 K 
+------------------------------------------------------------
+19.5 M    Trainable params
+0         Non-trainable params
+19.5 M    Total params
+77.846    Total estimated model params size (MB)
+============================================================
+  Conditional SEDD — mode=full
+  run_dir = /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220221
+  Sequence format: [class_token | 4096 mesh codes]
+  Vocab size: 297 (256 codes + 1 mask + 40 class tokens)
+============================================================
+[Dataset] train_codes.pt: 2720 samples, seq_len=4097, class_token range=[257, 296]
+[Dataset] val_codes.pt: 480 samples, seq_len=4097, class_token range=[257, 296]
+[INFO] Train: 2720 samples | Val: 480 samples
+[INFO] Batch size: 32 | Epochs: 100
+[INFO] Model parameters: 19.46M
+[INFO] Sequence length: 4097 (1 class token + 4096 mesh codes)
+[INFO] Vocab size: 297 (0-255 codes, 256 mask, 257-296 class tokens)
+
+Sanity Checking: 0it [00:00, ?it/s]/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/torch/distributed/c10d_logger.py:83: UserWarning: barrier(): using the device under current context. You can specify `device_id` in `init_process_group` to mute this warning.
+  return func(*args, **kwargs)
+============================================================
+  Conditional SEDD — mode=full
+  run_dir = /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220230
+  Sequence format: [class_token | 4096 mesh codes]
+  Vocab size: 297 (256 codes + 1 mask + 40 class tokens)
+============================================================
+[Dataset] train_codes.pt: 2720 samples, seq_len=4097, class_token range=[257, 296]
+[Dataset] val_codes.pt: 480 samples, seq_len=4097, class_token range=[257, 296]
+[INFO] Train: 2720 samples | Val: 480 samples
+[INFO] Batch size: 32 | Epochs: 100
+[INFO] Model parameters: 19.46M
+[INFO] Sequence length: 4097 (1 class token + 4096 mesh codes)
+[INFO] Vocab size: 297 (0-255 codes, 256 mask, 257-296 class tokens)
+============================================================
+  Conditional SEDD — mode=full
+  run_dir = /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220230
+  Sequence format: [class_token | 4096 mesh codes]
+  Vocab size: 297 (256 codes + 1 mask + 40 class tokens)
+============================================================
+[Dataset] train_codes.pt: 2720 samples, seq_len=4097, class_token range=[257, 296]
+[Dataset] val_codes.pt: 480 samples, seq_len=4097, class_token range=[257, 296]
+[INFO] Train: 2720 samples | Val: 480 samples
+[INFO] Batch size: 32 | Epochs: 100
+[INFO] Model parameters: 19.46M
+[INFO] Sequence length: 4097 (1 class token + 4096 mesh codes)
+[INFO] Vocab size: 297 (0-255 codes, 256 mask, 257-296 class tokens)
+============================================================
+  Conditional SEDD — mode=full
+  run_dir = /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220230
+  Sequence format: [class_token | 4096 mesh codes]
+  Vocab size: 297 (256 codes + 1 mask + 40 class tokens)
+============================================================
+[Dataset] train_codes.pt: 2720 samples, seq_len=4097, class_token range=[257, 296]
+[Dataset] val_codes.pt: 480 samples, seq_len=4097, class_token range=[257, 296]
+[INFO] Train: 2720 samples | Val: 480 samples
+[INFO] Batch size: 32 | Epochs: 100
+[INFO] Model parameters: 19.46M
+[INFO] Sequence length: 4097 (1 class token + 4096 mesh codes)
+[INFO] Vocab size: 297 (0-255 codes, 256 mask, 257-296 class tokens)
+============================================================
+  Conditional SEDD — mode=full
+  run_dir = /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220230
+  Sequence format: [class_token | 4096 mesh codes]
+  Vocab size: 297 (256 codes + 1 mask + 40 class tokens)
+============================================================
+[Dataset] train_codes.pt: 2720 samples, seq_len=4097, class_token range=[257, 296]
+[Dataset] val_codes.pt: 480 samples, seq_len=4097, class_token range=[257, 296]
+[INFO] Train: 2720 samples | Val: 480 samples
+[INFO] Batch size: 32 | Epochs: 100
+[INFO] Model parameters: 19.46M
+[INFO] Sequence length: 4097 (1 class token + 4096 mesh codes)
+[INFO] Vocab size: 297 (0-255 codes, 256 mask, 257-296 class tokens)
+============================================================
+  Conditional SEDD — mode=full
+  run_dir = /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220230
+  Sequence format: [class_token | 4096 mesh codes]
+  Vocab size: 297 (256 codes + 1 mask + 40 class tokens)
+============================================================
+[Dataset] train_codes.pt: 2720 samples, seq_len=4097, class_token range=[257, 296]
+[Dataset] val_codes.pt: 480 samples, seq_len=4097, class_token range=[257, 296]
+[INFO] Train: 2720 samples | Val: 480 samples
+[INFO] Batch size: 32 | Epochs: 100
+[INFO] Model parameters: 19.46M
+[INFO] Sequence length: 4097 (1 class token + 4096 mesh codes)
+[INFO] Vocab size: 297 (0-255 codes, 256 mask, 257-296 class tokens)
+============================================================
+  Conditional SEDD — mode=full
+  run_dir = /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220230
+  Sequence format: [class_token | 4096 mesh codes]
+  Vocab size: 297 (256 codes + 1 mask + 40 class tokens)
+============================================================
+[Dataset] train_codes.pt: 2720 samples, seq_len=4097, class_token range=[257, 296]
+[Dataset] val_codes.pt: 480 samples, seq_len=4097, class_token range=[257, 296]
+[INFO] Train: 2720 samples | Val: 480 samples
+[INFO] Batch size: 32 | Epochs: 100
+[INFO] Model parameters: 19.46M
+[INFO] Sequence length: 4097 (1 class token + 4096 mesh codes)
+[INFO] Vocab size: 297 (0-255 codes, 256 mask, 257-296 class tokens)
+============================================================
+  Conditional SEDD — mode=full
+  run_dir = /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220230
+  Sequence format: [class_token | 4096 mesh codes]
+  Vocab size: 297 (256 codes + 1 mask + 40 class tokens)
+============================================================
+[Dataset] train_codes.pt: 2720 samples, seq_len=4097, class_token range=[257, 296]
+[Dataset] val_codes.pt: 480 samples, seq_len=4097, class_token range=[257, 296]
+[INFO] Train: 2720 samples | Val: 480 samples
+[INFO] Batch size: 32 | Epochs: 100
+[INFO] Model parameters: 19.46M
+[INFO] Sequence length: 4097 (1 class token + 4096 mesh codes)
+[INFO] Vocab size: 297 (0-255 codes, 256 mask, 257-296 class tokens)
+
+Sanity Checking:   0%|          | 0/2 [00:00<?, ?it/s]
+Sanity Checking DataLoader 0:   0%|          | 0/2 [00:00<?, ?it/s]
+Sanity Checking DataLoader 0:  50%|█████     | 1/2 [00:05<00:05,  5.77s/it]
+Sanity Checking DataLoader 0: 100%|██████████| 2/2 [00:06<00:00,  3.05s/it]/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/pytorch_lightning/trainer/connectors/logger_connector/result.py:539: PossibleUserWarning: It is recommended to use `self.log('val_loss', ..., sync_dist=True)` when logging on epoch level in distributed setting to accumulate the metric across devices.
+  warning_cache.warn(
+
+                                                                           Missing logger folder: /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220230/lightning_logs
+Missing logger folder: /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220230/lightning_logs
+Missing logger folder: /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220230/lightning_logs
+Missing logger folder: /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220230/lightning_logs
+Missing logger folder: /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220230/lightning_logs
+Missing logger folder: /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220230/lightning_logs
+Missing logger folder: /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220230/lightning_logs
+
+
+Training: 0it [00:00, ?it/s]
+Training:   0%|          | 0/11 [00:00<?, ?it/s]
+Epoch 0:   0%|          | 0/11 [00:00<?, ?it/s] 
+Epoch 0:   9%|▉         | 1/11 [00:01<00:15,  1.58s/it]
+Epoch 0:   9%|▉         | 1/11 [00:01<00:15,  1.58s/it, loss=6.23, v_num=0, train_loss=6.230][rank0]:[W319 22:03:57.910596423 reducer.cpp:1500] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[rank4]:[W319 22:03:57.910660594 reducer.cpp:1500] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[rank2]:[W319 22:03:57.910768277 reducer.cpp:1500] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[rank6]:[W319 22:03:57.127543854 reducer.cpp:1500] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[rank3]:[W319 22:03:57.127560514 reducer.cpp:1500] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[rank1]:[W319 22:03:57.127612336 reducer.cpp:1500] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[rank7]:[W319 22:03:57.129359686 reducer.cpp:1500] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[rank5]:[W319 22:03:59.175284239 reducer.cpp:1500] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+
+Epoch 0:  18%|█▊        | 2/11 [00:05<00:23,  2.62s/it, loss=6.23, v_num=0, train_loss=6.230]
+Epoch 0:  18%|█▊        | 2/11 [00:05<00:23,  2.62s/it, loss=6.22, v_num=0, train_loss=6.200]
+Epoch 0:  27%|██▋       | 3/11 [00:05<00:14,  1.79s/it, loss=6.22, v_num=0, train_loss=6.200]
+Epoch 0:  27%|██▋       | 3/11 [00:05<00:14,  1.86s/it, loss=5.37, v_num=0, train_loss=3.670]
+Epoch 0:  36%|███▋      | 4/11 [00:06<00:10,  1.56s/it, loss=5.37, v_num=0, train_loss=3.670]
+Epoch 0:  36%|███▋      | 4/11 [00:06<00:11,  1.67s/it, loss=4.91, v_num=0, train_loss=3.550]
+Epoch 0:  45%|████▌     | 5/11 [00:06<00:08,  1.36s/it, loss=4.91, v_num=0, train_loss=3.550]
+Epoch 0:  45%|████▌     | 5/11 [00:07<00:08,  1.40s/it, loss=4.77, v_num=0, train_loss=4.170]
+Epoch 0:  55%|█████▍    | 6/11 [00:07<00:05,  1.19s/it, loss=4.77, v_num=0, train_loss=4.170]
+Epoch 0:  55%|█████▍    | 6/11 [00:07<00:06,  1.32s/it, loss=4.7, v_num=0, train_loss=4.350] 
+Epoch 0:  64%|██████▎   | 7/11 [00:08<00:04,  1.15s/it, loss=4.7, v_num=0, train_loss=4.350]
+Epoch 0:  64%|██████▎   | 7/11 [00:08<00:04,  1.18s/it, loss=4.56, v_num=0, train_loss=3.730]
+Epoch 0:  73%|███████▎  | 8/11 [00:08<00:03,  1.05s/it, loss=4.56, v_num=0, train_loss=3.730]
+Epoch 0:  73%|███████▎  | 8/11 [00:09<00:03,  1.18s/it, loss=4.42, v_num=0, train_loss=3.480]
+Epoch 0:  82%|████████▏ | 9/11 [00:09<00:02,  1.07s/it, loss=4.42, v_num=0, train_loss=3.480]
+Epoch 0:  82%|████████▏ | 9/11 [00:09<00:02,  1.09s/it, loss=4.33, v_num=0, train_loss=3.560]
+Epoch 0:  91%|█████████ | 10/11 [00:09<00:00,  1.00it/s, loss=4.33, v_num=0, train_loss=3.560]
+Epoch 0:  91%|█████████ | 10/11 [00:10<00:01,  1.02s/it, loss=4.27, v_num=0, train_loss=3.710]
+Epoch 0: 100%|██████████| 11/11 [00:10<00:00,  1.07it/s, loss=4.27, v_num=0, train_loss=3.710]
+Epoch 0: 100%|██████████| 11/11 [00:10<00:00,  1.06it/s, loss=4.22, v_num=0, train_loss=3.780]
+Epoch 0: 100%|██████████| 11/11 [00:10<00:00,  1.06it/s, loss=4.22, v_num=0, train_loss=3.780]
+Epoch 0:   0%|          | 0/13 [00:00<?, ?it/s, loss=4.22, v_num=0, train_loss=3.780]         
+Epoch 1:   0%|          | 0/13 [00:00<?, ?it/s, loss=4.22, v_num=0, train_loss=3.780]
+Epoch 1:   8%|▊         | 1/13 [00:01<00:12,  1.01s/it, loss=4.22, v_num=0, train_loss=3.780]
+Epoch 1:   8%|▊         | 1/13 [00:01<00:14,  1.22s/it, loss=4.18, v_num=0, train_loss=3.680]
+Epoch 1:  15%|█▌        | 2/13 [00:01<00:07,  1.47it/s, loss=4.18, v_num=0, train_loss=3.680]
+Epoch 1:  15%|█▌        | 2/13 [00:01<00:08,  1.28it/s, loss=4.12, v_num=0, train_loss=3.490]
+Epoch 1:  23%|██▎       | 3/13 [00:01<00:05,  1.77it/s, loss=4.12, v_num=0, train_loss=3.490]
+Epoch 1:  23%|██▎       | 3/13 [00:01<00:06,  1.57it/s, loss=4.09, v_num=0, train_loss=3.640]
+Epoch 1:  31%|███       | 4/13 [00:02<00:04,  1.97it/s, loss=4.09, v_num=0, train_loss=3.640]
+Epoch 1:  31%|███       | 4/13 [00:02<00:05,  1.55it/s, loss=4.05, v_num=0, train_loss=3.540]
+Epoch 1:  38%|███▊      | 5/13 [00:02<00:04,  1.84it/s, loss=4.05, v_num=0, train_loss=3.540]
+Epoch 1:  38%|███▊      | 5/13 [00:02<00:04,  1.71it/s, loss=4.02, v_num=0, train_loss=3.480]
+Epoch 1:  46%|████▌     | 6/13 [00:03<00:03,  1.96it/s, loss=4.02, v_num=0, train_loss=3.480]
+Epoch 1:  46%|████▌     | 6/13 [00:03<00:03,  1.84it/s, loss=3.99, v_num=0, train_loss=3.610]
+Epoch 1:  54%|█████▍    | 7/13 [00:03<00:02,  2.06it/s, loss=3.99, v_num=0, train_loss=3.610]
+Epoch 1:  54%|█████▍    | 7/13 [00:03<00:03,  1.94it/s, loss=3.97, v_num=0, train_loss=3.510]
+Epoch 1:  62%|██████▏   | 8/13 [00:03<00:02,  2.14it/s, loss=3.97, v_num=0, train_loss=3.510]
+Epoch 1:  62%|██████▏   | 8/13 [00:03<00:02,  2.02it/s, loss=3.93, v_num=0, train_loss=3.280]
+Epoch 1:  69%|██████▉   | 9/13 [00:04<00:01,  2.20it/s, loss=3.93, v_num=0, train_loss=3.280]
+Epoch 1:  69%|██████▉   | 9/13 [00:04<00:01,  2.09it/s, loss=3.89, v_num=0, train_loss=3.180]
+Epoch 1:  77%|███████▋  | 10/13 [00:04<00:01,  2.26it/s, loss=3.89, v_num=0, train_loss=3.180]
+Epoch 1:  77%|███████▋  | 10/13 [00:04<00:01,  2.15it/s, loss=3.76, v_num=0, train_loss=3.660]
+Epoch 1:  85%|████████▍ | 11/13 [00:04<00:00,  2.32it/s, loss=3.76, v_num=0, train_loss=3.660]
+Epoch 1:  85%|████████▍ | 11/13 [00:04<00:00,  2.26it/s, loss=3.63, v_num=0, train_loss=3.590]
+
+Validation: 0it [00:00, ?it/s][A
+
+Validation:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:  50%|█████     | 1/2 [00:00<00:00,  9.88it/s][A
+Epoch 1:  92%|█████████▏| 12/13 [00:05<00:00,  2.26it/s, loss=3.63, v_num=0, train_loss=3.590]
+
+Validation DataLoader 0: 100%|██████████| 2/2 [00:00<00:00, 10.54it/s][A
+Epoch 1: 100%|██████████| 13/13 [00:05<00:00,  2.40it/s, loss=3.63, v_num=0, train_loss=3.590][rank: 0] Metric val_loss improved. New best score: 3.386
+[rank: 7] Metric val_loss improved. New best score: 3.486
+[rank: 3] Metric val_loss improved. New best score: 3.552
+[rank: 6] Metric val_loss improved. New best score: 3.502
+[rank: 4] Metric val_loss improved. New best score: 3.501
+[rank: 2] Metric val_loss improved. New best score: 3.592
+[rank: 1] Metric val_loss improved. New best score: 3.638
+[rank: 5] Metric val_loss improved. New best score: 3.282
+
+Epoch 1: 100%|██████████| 13/13 [00:05<00:00,  2.38it/s, loss=3.63, v_num=0, train_loss=3.590, val_loss=3.390]
+
+                                                                      [A
+Epoch 1: 100%|██████████| 13/13 [00:06<00:00,  2.14it/s, loss=3.63, v_num=0, train_loss=3.590, val_loss=3.390]
+Epoch 1:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.63, v_num=0, train_loss=3.590, val_loss=3.390]         
+Epoch 2:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.63, v_num=0, train_loss=3.590, val_loss=3.390]
+Epoch 2:   9%|▉         | 1/11 [00:00<00:05,  1.86it/s, loss=3.63, v_num=0, train_loss=3.590, val_loss=3.390]
+Epoch 2:   9%|▉         | 1/11 [00:00<00:07,  1.33it/s, loss=3.62, v_num=0, train_loss=3.440, val_loss=3.390]
+Epoch 2:  18%|█▊        | 2/11 [00:00<00:03,  2.26it/s, loss=3.62, v_num=0, train_loss=3.440, val_loss=3.390]
+Epoch 2:  18%|█▊        | 2/11 [00:01<00:04,  1.83it/s, loss=3.61, v_num=0, train_loss=3.270, val_loss=3.390]
+Epoch 2:  27%|██▋       | 3/11 [00:01<00:03,  2.45it/s, loss=3.61, v_num=0, train_loss=3.270, val_loss=3.390]
+Epoch 2:  27%|██▋       | 3/11 [00:01<00:03,  2.09it/s, loss=3.58, v_num=0, train_loss=3.540, val_loss=3.390]
+Epoch 2:  36%|███▋      | 4/11 [00:01<00:02,  2.55it/s, loss=3.58, v_num=0, train_loss=3.540, val_loss=3.390]
+Epoch 2:  36%|███▋      | 4/11 [00:01<00:03,  2.02it/s, loss=3.54, v_num=0, train_loss=3.670, val_loss=3.390]
+Epoch 2:  45%|████▌     | 5/11 [00:02<00:02,  2.37it/s, loss=3.54, v_num=0, train_loss=3.670, val_loss=3.390]
+Epoch 2:  45%|████▌     | 5/11 [00:02<00:02,  2.16it/s, loss=3.51, v_num=0, train_loss=3.170, val_loss=3.390]
+Epoch 2:  55%|█████▍    | 6/11 [00:02<00:02,  2.45it/s, loss=3.51, v_num=0, train_loss=3.170, val_loss=3.390]
+Epoch 2:  55%|█████▍    | 6/11 [00:02<00:02,  2.24it/s, loss=3.51, v_num=0, train_loss=3.510, val_loss=3.390]
+Epoch 2:  64%|██████▎   | 7/11 [00:02<00:01,  2.50it/s, loss=3.51, v_num=0, train_loss=3.510, val_loss=3.390]
+Epoch 2:  64%|██████▎   | 7/11 [00:03<00:01,  2.32it/s, loss=3.5, v_num=0, train_loss=3.330, val_loss=3.390] 
+Epoch 2:  73%|███████▎  | 8/11 [00:03<00:01,  2.54it/s, loss=3.5, v_num=0, train_loss=3.330, val_loss=3.390]
+Epoch 2:  73%|███████▎  | 8/11 [00:03<00:01,  2.38it/s, loss=3.49, v_num=0, train_loss=3.380, val_loss=3.390]
+Epoch 2:  82%|████████▏ | 9/11 [00:03<00:00,  2.58it/s, loss=3.49, v_num=0, train_loss=3.380, val_loss=3.390]
+Epoch 2:  82%|████████▏ | 9/11 [00:03<00:00,  2.43it/s, loss=3.47, v_num=0, train_loss=3.510, val_loss=3.390]
+Epoch 2:  91%|█████████ | 10/11 [00:03<00:00,  2.60it/s, loss=3.47, v_num=0, train_loss=3.510, val_loss=3.390]
+Epoch 2:  91%|█████████ | 10/11 [00:04<00:00,  2.47it/s, loss=3.46, v_num=0, train_loss=3.400, val_loss=3.390]
+Epoch 2: 100%|██████████| 11/11 [00:04<00:00,  2.65it/s, loss=3.46, v_num=0, train_loss=3.400, val_loss=3.390]
+Epoch 2: 100%|██████████| 11/11 [00:04<00:00,  2.57it/s, loss=3.45, v_num=0, train_loss=3.290, val_loss=3.390]
+Epoch 2: 100%|██████████| 11/11 [00:04<00:00,  2.57it/s, loss=3.45, v_num=0, train_loss=3.290, val_loss=3.390]
+Epoch 2:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.45, v_num=0, train_loss=3.290, val_loss=3.390]         
+Epoch 3:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.45, v_num=0, train_loss=3.290, val_loss=3.390]
+Epoch 3:   8%|▊         | 1/13 [00:00<00:06,  1.85it/s, loss=3.45, v_num=0, train_loss=3.290, val_loss=3.390]
+Epoch 3:   8%|▊         | 1/13 [00:00<00:09,  1.33it/s, loss=3.44, v_num=0, train_loss=3.500, val_loss=3.390]
+Epoch 3:  15%|█▌        | 2/13 [00:00<00:04,  2.25it/s, loss=3.44, v_num=0, train_loss=3.500, val_loss=3.390]
+Epoch 3:  15%|█▌        | 2/13 [00:01<00:06,  1.82it/s, loss=3.44, v_num=0, train_loss=3.380, val_loss=3.390]
+Epoch 3:  23%|██▎       | 3/13 [00:01<00:04,  2.35it/s, loss=3.44, v_num=0, train_loss=3.380, val_loss=3.390]
+Epoch 3:  23%|██▎       | 3/13 [00:01<00:04,  2.08it/s, loss=3.42, v_num=0, train_loss=3.250, val_loss=3.390]
+Epoch 3:  31%|███       | 4/13 [00:01<00:03,  2.52it/s, loss=3.42, v_num=0, train_loss=3.250, val_loss=3.390]
+Epoch 3:  31%|███       | 4/13 [00:01<00:04,  2.18it/s, loss=3.42, v_num=0, train_loss=3.540, val_loss=3.390]
+Epoch 3:  38%|███▊      | 5/13 [00:02<00:03,  2.48it/s, loss=3.42, v_num=0, train_loss=3.540, val_loss=3.390]
+Epoch 3:  38%|███▊      | 5/13 [00:02<00:03,  2.24it/s, loss=3.42, v_num=0, train_loss=3.520, val_loss=3.390]
+Epoch 3:  46%|████▌     | 6/13 [00:02<00:02,  2.54it/s, loss=3.42, v_num=0, train_loss=3.520, val_loss=3.390]
+Epoch 3:  46%|████▌     | 6/13 [00:02<00:03,  2.33it/s, loss=3.42, v_num=0, train_loss=3.380, val_loss=3.390]
+Epoch 3:  54%|█████▍    | 7/13 [00:02<00:02,  2.59it/s, loss=3.42, v_num=0, train_loss=3.380, val_loss=3.390]
+Epoch 3:  54%|█████▍    | 7/13 [00:02<00:02,  2.40it/s, loss=3.44, v_num=0, train_loss=3.450, val_loss=3.390]
+Epoch 3:  62%|██████▏   | 8/13 [00:03<00:01,  2.62it/s, loss=3.44, v_num=0, train_loss=3.450, val_loss=3.390]
+Epoch 3:  62%|██████▏   | 8/13 [00:03<00:02,  2.45it/s, loss=3.43, v_num=0, train_loss=3.470, val_loss=3.390]
+Epoch 3:  69%|██████▉   | 9/13 [00:03<00:01,  2.65it/s, loss=3.43, v_num=0, train_loss=3.470, val_loss=3.390]
+Epoch 3:  69%|██████▉   | 9/13 [00:03<00:01,  2.49it/s, loss=3.42, v_num=0, train_loss=3.360, val_loss=3.390]
+Epoch 3:  77%|███████▋  | 10/13 [00:03<00:01,  2.67it/s, loss=3.42, v_num=0, train_loss=3.360, val_loss=3.390]
+Epoch 3:  77%|███████▋  | 10/13 [00:03<00:01,  2.53it/s, loss=3.41, v_num=0, train_loss=3.340, val_loss=3.390]
+Epoch 3:  85%|████████▍ | 11/13 [00:04<00:00,  2.72it/s, loss=3.41, v_num=0, train_loss=3.340, val_loss=3.390]
+Epoch 3:  85%|████████▍ | 11/13 [00:04<00:00,  2.63it/s, loss=3.43, v_num=0, train_loss=3.520, val_loss=3.390]
+
+Validation: 0it [00:00, ?it/s][A
+
+Validation:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:  50%|█████     | 1/2 [00:00<00:00,  9.96it/s][A
+Epoch 3:  92%|█████████▏| 12/13 [00:04<00:00,  2.57it/s, loss=3.43, v_num=0, train_loss=3.520, val_loss=3.390]
+
+Validation DataLoader 0: 100%|██████████| 2/2 [00:00<00:00, 10.60it/s][A
+Epoch 3: 100%|██████████| 13/13 [00:04<00:00,  2.73it/s, loss=3.43, v_num=0, train_loss=3.520, val_loss=3.390][rank: 0] Metric val_loss improved by 0.045 >= min_delta = 0.0. New best score: 3.341
+[rank: 2] Metric val_loss improved by 0.218 >= min_delta = 0.0. New best score: 3.374
+[rank: 6] Metric val_loss improved by 0.066 >= min_delta = 0.0. New best score: 3.436
+[rank: 1] Metric val_loss improved by 0.171 >= min_delta = 0.0. New best score: 3.467
+[rank: 3] Metric val_loss improved by 0.156 >= min_delta = 0.0. New best score: 3.396
+[rank: 5] Metric val_loss improved by 0.061 >= min_delta = 0.0. New best score: 3.221
+[rank: 7] Metric val_loss improved by 0.106 >= min_delta = 0.0. New best score: 3.380
+[rank: 4] Metric val_loss improved by 0.023 >= min_delta = 0.0. New best score: 3.478
+
+Epoch 3: 100%|██████████| 13/13 [00:04<00:00,  2.66it/s, loss=3.43, v_num=0, train_loss=3.520, val_loss=3.340]
+
+                                                                      [A
+Epoch 3: 100%|██████████| 13/13 [00:05<00:00,  2.36it/s, loss=3.43, v_num=0, train_loss=3.520, val_loss=3.340]
+Epoch 3:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.43, v_num=0, train_loss=3.520, val_loss=3.340]         
+Epoch 4:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.43, v_num=0, train_loss=3.520, val_loss=3.340]
+Epoch 4:   9%|▉         | 1/11 [00:00<00:05,  1.90it/s, loss=3.43, v_num=0, train_loss=3.520, val_loss=3.340]
+Epoch 4:   9%|▉         | 1/11 [00:00<00:07,  1.36it/s, loss=3.41, v_num=0, train_loss=3.300, val_loss=3.340]
+Epoch 4:  18%|█▊        | 2/11 [00:00<00:03,  2.29it/s, loss=3.41, v_num=0, train_loss=3.300, val_loss=3.340]
+Epoch 4:  18%|█▊        | 2/11 [00:01<00:04,  1.85it/s, loss=3.41, v_num=0, train_loss=3.600, val_loss=3.340]
+Epoch 4:  27%|██▋       | 3/11 [00:01<00:03,  2.48it/s, loss=3.41, v_num=0, train_loss=3.600, val_loss=3.340]
+Epoch 4:  27%|██▋       | 3/11 [00:01<00:03,  2.10it/s, loss=3.41, v_num=0, train_loss=3.230, val_loss=3.340]
+Epoch 4:  36%|███▋      | 4/11 [00:01<00:02,  2.56it/s, loss=3.41, v_num=0, train_loss=3.230, val_loss=3.340]
+Epoch 4:  36%|███▋      | 4/11 [00:01<00:03,  2.26it/s, loss=3.39, v_num=0, train_loss=3.100, val_loss=3.340]
+Epoch 4:  45%|████▌     | 5/11 [00:01<00:02,  2.63it/s, loss=3.39, v_num=0, train_loss=3.100, val_loss=3.340]
+Epoch 4:  45%|████▌     | 5/11 [00:02<00:02,  2.36it/s, loss=3.39, v_num=0, train_loss=3.360, val_loss=3.340]
+Epoch 4:  55%|█████▍    | 6/11 [00:02<00:01,  2.67it/s, loss=3.39, v_num=0, train_loss=3.360, val_loss=3.340]
+Epoch 4:  55%|█████▍    | 6/11 [00:02<00:02,  2.44it/s, loss=3.4, v_num=0, train_loss=3.560, val_loss=3.340] 
+Epoch 4:  64%|██████▎   | 7/11 [00:02<00:01,  2.70it/s, loss=3.4, v_num=0, train_loss=3.560, val_loss=3.340]
+Epoch 4:  64%|██████▎   | 7/11 [00:02<00:01,  2.50it/s, loss=3.39, v_num=0, train_loss=3.180, val_loss=3.340]
+Epoch 4:  73%|███████▎  | 8/11 [00:02<00:01,  2.72it/s, loss=3.39, v_num=0, train_loss=3.180, val_loss=3.340]
+Epoch 4:  73%|███████▎  | 8/11 [00:03<00:01,  2.54it/s, loss=3.38, v_num=0, train_loss=3.230, val_loss=3.340]
+Epoch 4:  82%|████████▏ | 9/11 [00:03<00:00,  2.74it/s, loss=3.38, v_num=0, train_loss=3.230, val_loss=3.340]
+Epoch 4:  82%|████████▏ | 9/11 [00:03<00:00,  2.57it/s, loss=3.38, v_num=0, train_loss=3.390, val_loss=3.340]
+Epoch 4:  91%|█████████ | 10/11 [00:03<00:00,  2.75it/s, loss=3.38, v_num=0, train_loss=3.390, val_loss=3.340]
+Epoch 4:  91%|█████████ | 10/11 [00:03<00:00,  2.60it/s, loss=3.38, v_num=0, train_loss=3.360, val_loss=3.340]
+Epoch 4: 100%|██████████| 11/11 [00:03<00:00,  2.79it/s, loss=3.38, v_num=0, train_loss=3.360, val_loss=3.340]
+Epoch 4: 100%|██████████| 11/11 [00:04<00:00,  2.71it/s, loss=3.38, v_num=0, train_loss=3.460, val_loss=3.340]
+Epoch 4: 100%|██████████| 11/11 [00:04<00:00,  2.70it/s, loss=3.38, v_num=0, train_loss=3.460, val_loss=3.340]
+Epoch 4:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.38, v_num=0, train_loss=3.460, val_loss=3.340]         
+Epoch 5:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.38, v_num=0, train_loss=3.460, val_loss=3.340]
+Epoch 5:   8%|▊         | 1/13 [00:00<00:06,  1.86it/s, loss=3.38, v_num=0, train_loss=3.460, val_loss=3.340]
+Epoch 5:   8%|▊         | 1/13 [00:00<00:08,  1.34it/s, loss=3.38, v_num=0, train_loss=3.180, val_loss=3.340]
+Epoch 5:  15%|█▌        | 2/13 [00:00<00:04,  2.26it/s, loss=3.38, v_num=0, train_loss=3.180, val_loss=3.340]
+Epoch 5:  15%|█▌        | 2/13 [00:01<00:06,  1.74it/s, loss=3.36, v_num=0, train_loss=3.190, val_loss=3.340]
+Epoch 5:  23%|██▎       | 3/13 [00:01<00:04,  2.35it/s, loss=3.36, v_num=0, train_loss=3.190, val_loss=3.340]
+Epoch 5:  23%|██▎       | 3/13 [00:01<00:04,  2.01it/s, loss=3.35, v_num=0, train_loss=3.420, val_loss=3.340]
+Epoch 5:  31%|███       | 4/13 [00:01<00:03,  2.46it/s, loss=3.35, v_num=0, train_loss=3.420, val_loss=3.340]
+Epoch 5:  31%|███       | 4/13 [00:01<00:04,  2.18it/s, loss=3.36, v_num=0, train_loss=3.490, val_loss=3.340]
+Epoch 5:  38%|███▊      | 5/13 [00:01<00:03,  2.55it/s, loss=3.36, v_num=0, train_loss=3.490, val_loss=3.340]
+Epoch 5:  38%|███▊      | 5/13 [00:02<00:03,  2.29it/s, loss=3.36, v_num=0, train_loss=3.430, val_loss=3.340]
+Epoch 5:  46%|████▌     | 6/13 [00:02<00:02,  2.59it/s, loss=3.36, v_num=0, train_loss=3.430, val_loss=3.340]
+Epoch 5:  46%|████▌     | 6/13 [00:02<00:02,  2.37it/s, loss=3.35, v_num=0, train_loss=3.220, val_loss=3.340]
+Epoch 5:  54%|█████▍    | 7/13 [00:02<00:02,  2.63it/s, loss=3.35, v_num=0, train_loss=3.220, val_loss=3.340]
+Epoch 5:  54%|█████▍    | 7/13 [00:02<00:02,  2.44it/s, loss=3.34, v_num=0, train_loss=3.240, val_loss=3.340]
+Epoch 5:  62%|██████▏   | 8/13 [00:03<00:01,  2.64it/s, loss=3.34, v_num=0, train_loss=3.240, val_loss=3.340]
+Epoch 5:  62%|██████▏   | 8/13 [00:03<00:02,  2.47it/s, loss=3.34, v_num=0, train_loss=3.360, val_loss=3.340]
+Epoch 5:  69%|██████▉   | 9/13 [00:03<00:01,  2.67it/s, loss=3.34, v_num=0, train_loss=3.360, val_loss=3.340]
+Epoch 5:  69%|██████▉   | 9/13 [00:03<00:01,  2.51it/s, loss=3.33, v_num=0, train_loss=3.240, val_loss=3.340]
+Epoch 5:  77%|███████▋  | 10/13 [00:03<00:01,  2.69it/s, loss=3.33, v_num=0, train_loss=3.240, val_loss=3.340]
+Epoch 5:  77%|███████▋  | 10/13 [00:03<00:01,  2.54it/s, loss=3.34, v_num=0, train_loss=3.520, val_loss=3.340]
+Epoch 5:  85%|████████▍ | 11/13 [00:04<00:00,  2.73it/s, loss=3.34, v_num=0, train_loss=3.520, val_loss=3.340]
+Epoch 5:  85%|████████▍ | 11/13 [00:04<00:00,  2.65it/s, loss=3.34, v_num=0, train_loss=3.710, val_loss=3.340]
+
+Validation: 0it [00:00, ?it/s][A
+
+Validation:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:  50%|█████     | 1/2 [00:00<00:00,  9.88it/s][A
+Epoch 5:  92%|█████████▏| 12/13 [00:04<00:00,  2.59it/s, loss=3.34, v_num=0, train_loss=3.710, val_loss=3.340]
+
+Validation DataLoader 0: 100%|██████████| 2/2 [00:00<00:00, 10.52it/s][A
+Epoch 5: 100%|██████████| 13/13 [00:04<00:00,  2.75it/s, loss=3.34, v_num=0, train_loss=3.710, val_loss=3.340][rank: 2] Metric val_loss improved by 0.025 >= min_delta = 0.0. New best score: 3.348
+[rank: 6] Metric val_loss improved by 0.028 >= min_delta = 0.0. New best score: 3.408
+[rank: 1] Metric val_loss improved by 0.081 >= min_delta = 0.0. New best score: 3.386
+[rank: 4] Metric val_loss improved by 0.081 >= min_delta = 0.0. New best score: 3.396
+
+Epoch 5: 100%|██████████| 13/13 [00:04<00:00,  2.67it/s, loss=3.34, v_num=0, train_loss=3.710, val_loss=3.450]
+
+                                                                      [A
+Epoch 5: 100%|██████████| 13/13 [00:05<00:00,  2.34it/s, loss=3.34, v_num=0, train_loss=3.710, val_loss=3.450]
+Epoch 5:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.34, v_num=0, train_loss=3.710, val_loss=3.450]         
+Epoch 6:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.34, v_num=0, train_loss=3.710, val_loss=3.450]
+Epoch 6:   9%|▉         | 1/11 [00:00<00:05,  1.99it/s, loss=3.34, v_num=0, train_loss=3.710, val_loss=3.450]
+Epoch 6:   9%|▉         | 1/11 [00:00<00:07,  1.38it/s, loss=3.35, v_num=0, train_loss=3.290, val_loss=3.450]
+Epoch 6:  18%|█▊        | 2/11 [00:00<00:03,  2.33it/s, loss=3.35, v_num=0, train_loss=3.290, val_loss=3.450]
+Epoch 6:  18%|█▊        | 2/11 [00:01<00:04,  1.87it/s, loss=3.37, v_num=0, train_loss=3.530, val_loss=3.450]
+Epoch 6:  27%|██▋       | 3/11 [00:01<00:03,  2.51it/s, loss=3.37, v_num=0, train_loss=3.530, val_loss=3.450]
+Epoch 6:  27%|██▋       | 3/11 [00:01<00:03,  2.13it/s, loss=3.37, v_num=0, train_loss=3.440, val_loss=3.450]
+Epoch 6:  36%|███▋      | 4/11 [00:01<00:02,  2.58it/s, loss=3.37, v_num=0, train_loss=3.440, val_loss=3.450]
+Epoch 6:  36%|███▋      | 4/11 [00:01<00:03,  2.28it/s, loss=3.37, v_num=0, train_loss=3.550, val_loss=3.450]
+Epoch 6:  45%|████▌     | 5/11 [00:01<00:02,  2.66it/s, loss=3.37, v_num=0, train_loss=3.550, val_loss=3.450]
+Epoch 6:  45%|████▌     | 5/11 [00:02<00:02,  2.38it/s, loss=3.4, v_num=0, train_loss=3.730, val_loss=3.450] 
+Epoch 6:  55%|█████▍    | 6/11 [00:02<00:01,  2.70it/s, loss=3.4, v_num=0, train_loss=3.730, val_loss=3.450]
+Epoch 6:  55%|█████▍    | 6/11 [00:02<00:02,  2.45it/s, loss=3.39, v_num=0, train_loss=3.090, val_loss=3.450]
+Epoch 6:  64%|██████▎   | 7/11 [00:02<00:01,  2.72it/s, loss=3.39, v_num=0, train_loss=3.090, val_loss=3.450]
+Epoch 6:  64%|██████▎   | 7/11 [00:02<00:01,  2.51it/s, loss=3.39, v_num=0, train_loss=3.310, val_loss=3.450]
+Epoch 6:  73%|███████▎  | 8/11 [00:02<00:01,  2.74it/s, loss=3.39, v_num=0, train_loss=3.310, val_loss=3.450]
+Epoch 6:  73%|███████▎  | 8/11 [00:03<00:01,  2.55it/s, loss=3.38, v_num=0, train_loss=3.170, val_loss=3.450]
+Epoch 6:  82%|████████▏ | 9/11 [00:03<00:00,  2.76it/s, loss=3.38, v_num=0, train_loss=3.170, val_loss=3.450]
+Epoch 6:  82%|████████▏ | 9/11 [00:03<00:00,  2.58it/s, loss=3.38, v_num=0, train_loss=3.440, val_loss=3.450]
+Epoch 6:  91%|█████████ | 10/11 [00:03<00:00,  2.77it/s, loss=3.38, v_num=0, train_loss=3.440, val_loss=3.450]
+Epoch 6:  91%|█████████ | 10/11 [00:03<00:00,  2.61it/s, loss=3.38, v_num=0, train_loss=3.330, val_loss=3.450]
+Epoch 6: 100%|██████████| 11/11 [00:03<00:00,  2.80it/s, loss=3.38, v_num=0, train_loss=3.330, val_loss=3.450]
+Epoch 6: 100%|██████████| 11/11 [00:04<00:00,  2.71it/s, loss=3.39, v_num=0, train_loss=3.400, val_loss=3.450]
+Epoch 6: 100%|██████████| 11/11 [00:04<00:00,  2.71it/s, loss=3.39, v_num=0, train_loss=3.400, val_loss=3.450]
+Epoch 6:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.39, v_num=0, train_loss=3.400, val_loss=3.450]         
+Epoch 7:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.39, v_num=0, train_loss=3.400, val_loss=3.450]
+Epoch 7:   8%|▊         | 1/13 [00:00<00:05,  2.02it/s, loss=3.39, v_num=0, train_loss=3.400, val_loss=3.450]
+Epoch 7:   8%|▊         | 1/13 [00:00<00:08,  1.40it/s, loss=3.4, v_num=0, train_loss=3.480, val_loss=3.450] 
+Epoch 7:  15%|█▌        | 2/13 [00:00<00:04,  2.38it/s, loss=3.4, v_num=0, train_loss=3.480, val_loss=3.450]
+Epoch 7:  15%|█▌        | 2/13 [00:01<00:06,  1.67it/s, loss=3.39, v_num=0, train_loss=3.420, val_loss=3.450]
+Epoch 7:  23%|██▎       | 3/13 [00:01<00:04,  2.28it/s, loss=3.39, v_num=0, train_loss=3.420, val_loss=3.450]
+Epoch 7:  23%|██▎       | 3/13 [00:01<00:05,  1.95it/s, loss=3.39, v_num=0, train_loss=3.400, val_loss=3.450]
+Epoch 7:  31%|███       | 4/13 [00:01<00:03,  2.41it/s, loss=3.39, v_num=0, train_loss=3.400, val_loss=3.450]
+Epoch 7:  31%|███       | 4/13 [00:01<00:04,  2.12it/s, loss=3.4, v_num=0, train_loss=3.440, val_loss=3.450] 
+Epoch 7:  38%|███▊      | 5/13 [00:02<00:03,  2.49it/s, loss=3.4, v_num=0, train_loss=3.440, val_loss=3.450]
+Epoch 7:  38%|███▊      | 5/13 [00:02<00:03,  2.24it/s, loss=3.41, v_num=0, train_loss=3.350, val_loss=3.450]
+Epoch 7:  46%|████▌     | 6/13 [00:02<00:02,  2.55it/s, loss=3.41, v_num=0, train_loss=3.350, val_loss=3.450]
+Epoch 7:  46%|████▌     | 6/13 [00:02<00:03,  2.33it/s, loss=3.41, v_num=0, train_loss=3.410, val_loss=3.450]
+Epoch 7:  54%|█████▍    | 7/13 [00:02<00:02,  2.59it/s, loss=3.41, v_num=0, train_loss=3.410, val_loss=3.450]
+Epoch 7:  54%|█████▍    | 7/13 [00:02<00:02,  2.39it/s, loss=3.41, v_num=0, train_loss=3.220, val_loss=3.450]
+Epoch 7:  62%|██████▏   | 8/13 [00:03<00:01,  2.62it/s, loss=3.41, v_num=0, train_loss=3.220, val_loss=3.450]
+Epoch 7:  62%|██████▏   | 8/13 [00:03<00:02,  2.45it/s, loss=3.41, v_num=0, train_loss=3.440, val_loss=3.450]
+Epoch 7:  69%|██████▉   | 9/13 [00:03<00:01,  2.65it/s, loss=3.41, v_num=0, train_loss=3.440, val_loss=3.450]
+Epoch 7:  69%|██████▉   | 9/13 [00:03<00:01,  2.49it/s, loss=3.39, v_num=0, train_loss=3.360, val_loss=3.450]
+Epoch 7:  77%|███████▋  | 10/13 [00:03<00:01,  2.67it/s, loss=3.39, v_num=0, train_loss=3.360, val_loss=3.450]
+Epoch 7:  77%|███████▋  | 10/13 [00:03<00:01,  2.52it/s, loss=3.4, v_num=0, train_loss=3.410, val_loss=3.450] 
+Epoch 7:  85%|████████▍ | 11/13 [00:04<00:00,  2.70it/s, loss=3.4, v_num=0, train_loss=3.410, val_loss=3.450]
+Epoch 7:  85%|████████▍ | 11/13 [00:04<00:00,  2.62it/s, loss=3.38, v_num=0, train_loss=3.280, val_loss=3.450]
+
+Validation: 0it [00:00, ?it/s][A
+
+Validation:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:  50%|█████     | 1/2 [00:00<00:00,  9.83it/s][A
+Epoch 7:  92%|█████████▏| 12/13 [00:04<00:00,  2.55it/s, loss=3.38, v_num=0, train_loss=3.280, val_loss=3.450]
+
+Validation DataLoader 0: 100%|██████████| 2/2 [00:00<00:00, 10.48it/s][A
+Epoch 7: 100%|██████████| 13/13 [00:04<00:00,  2.71it/s, loss=3.38, v_num=0, train_loss=3.280, val_loss=3.450][rank: 1] Metric val_loss improved by 0.030 >= min_delta = 0.0. New best score: 3.356
+[rank: 6] Metric val_loss improved by 0.039 >= min_delta = 0.0. New best score: 3.369
+[rank: 5] Metric val_loss improved by 0.097 >= min_delta = 0.0. New best score: 3.124
+
+Epoch 7: 100%|██████████| 13/13 [00:04<00:00,  2.66it/s, loss=3.38, v_num=0, train_loss=3.280, val_loss=3.390]
+
+                                                                      [A
+Epoch 7: 100%|██████████| 13/13 [00:05<00:00,  2.35it/s, loss=3.38, v_num=0, train_loss=3.280, val_loss=3.390]
+Epoch 7:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.38, v_num=0, train_loss=3.280, val_loss=3.390]         
+Epoch 8:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.38, v_num=0, train_loss=3.280, val_loss=3.390]
+Epoch 8:   9%|▉         | 1/11 [00:00<00:05,  1.92it/s, loss=3.38, v_num=0, train_loss=3.280, val_loss=3.390]
+Epoch 8:   9%|▉         | 1/11 [00:00<00:07,  1.35it/s, loss=3.38, v_num=0, train_loss=3.360, val_loss=3.390]
+Epoch 8:  18%|█▊        | 2/11 [00:00<00:03,  2.30it/s, loss=3.38, v_num=0, train_loss=3.360, val_loss=3.390]
+Epoch 8:  18%|█▊        | 2/11 [00:01<00:04,  1.84it/s, loss=3.35, v_num=0, train_loss=3.010, val_loss=3.390]
+Epoch 8:  27%|██▋       | 3/11 [00:01<00:03,  2.48it/s, loss=3.35, v_num=0, train_loss=3.010, val_loss=3.390]
+Epoch 8:  27%|██▋       | 3/11 [00:01<00:03,  2.09it/s, loss=3.34, v_num=0, train_loss=3.500, val_loss=3.390]
+Epoch 8:  36%|███▋      | 4/11 [00:01<00:02,  2.57it/s, loss=3.34, v_num=0, train_loss=3.500, val_loss=3.390]
+Epoch 8:  36%|███▋      | 4/11 [00:01<00:03,  2.25it/s, loss=3.36, v_num=0, train_loss=3.380, val_loss=3.390]
+Epoch 8:  45%|████▌     | 5/11 [00:01<00:02,  2.63it/s, loss=3.36, v_num=0, train_loss=3.380, val_loss=3.390]
+Epoch 8:  45%|████▌     | 5/11 [00:02<00:02,  2.35it/s, loss=3.35, v_num=0, train_loss=3.230, val_loss=3.390]
+Epoch 8:  55%|█████▍    | 6/11 [00:02<00:01,  2.67it/s, loss=3.35, v_num=0, train_loss=3.230, val_loss=3.390]
+Epoch 8:  55%|█████▍    | 6/11 [00:02<00:02,  2.42it/s, loss=3.36, v_num=0, train_loss=3.300, val_loss=3.390]
+Epoch 8:  64%|██████▎   | 7/11 [00:02<00:01,  2.70it/s, loss=3.36, v_num=0, train_loss=3.300, val_loss=3.390]
+Epoch 8:  64%|██████▎   | 7/11 [00:02<00:01,  2.48it/s, loss=3.37, v_num=0, train_loss=3.600, val_loss=3.390]
+Epoch 8:  73%|███████▎  | 8/11 [00:02<00:01,  2.71it/s, loss=3.37, v_num=0, train_loss=3.600, val_loss=3.390]
+Epoch 8:  73%|███████▎  | 8/11 [00:03<00:01,  2.53it/s, loss=3.37, v_num=0, train_loss=3.400, val_loss=3.390]
+Epoch 8:  82%|████████▏ | 9/11 [00:03<00:00,  2.73it/s, loss=3.37, v_num=0, train_loss=3.400, val_loss=3.390]
+Epoch 8:  82%|████████▏ | 9/11 [00:03<00:00,  2.56it/s, loss=3.37, v_num=0, train_loss=3.390, val_loss=3.390]
+Epoch 8:  91%|█████████ | 10/11 [00:03<00:00,  2.74it/s, loss=3.37, v_num=0, train_loss=3.390, val_loss=3.390]
+Epoch 8:  91%|█████████ | 10/11 [00:03<00:00,  2.59it/s, loss=3.37, v_num=0, train_loss=3.490, val_loss=3.390]
+Epoch 8: 100%|██████████| 11/11 [00:03<00:00,  2.78it/s, loss=3.37, v_num=0, train_loss=3.490, val_loss=3.390]
+Epoch 8: 100%|██████████| 11/11 [00:04<00:00,  2.69it/s, loss=3.37, v_num=0, train_loss=3.450, val_loss=3.390]
+Epoch 8: 100%|██████████| 11/11 [00:04<00:00,  2.69it/s, loss=3.37, v_num=0, train_loss=3.450, val_loss=3.390]
+Epoch 8:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.37, v_num=0, train_loss=3.450, val_loss=3.390]         
+Epoch 9:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.37, v_num=0, train_loss=3.450, val_loss=3.390]
+Epoch 9:   8%|▊         | 1/13 [00:00<00:06,  1.88it/s, loss=3.37, v_num=0, train_loss=3.450, val_loss=3.390]
+Epoch 9:   8%|▊         | 1/13 [00:00<00:08,  1.35it/s, loss=3.36, v_num=0, train_loss=3.250, val_loss=3.390]
+Epoch 9:  15%|█▌        | 2/13 [00:00<00:04,  2.28it/s, loss=3.36, v_num=0, train_loss=3.250, val_loss=3.390]
+Epoch 9:  15%|█▌        | 2/13 [00:01<00:06,  1.76it/s, loss=3.36, v_num=0, train_loss=3.380, val_loss=3.390]
+Epoch 9:  23%|██▎       | 3/13 [00:01<00:04,  2.37it/s, loss=3.36, v_num=0, train_loss=3.380, val_loss=3.390]
+Epoch 9:  23%|██▎       | 3/13 [00:01<00:04,  2.02it/s, loss=3.36, v_num=0, train_loss=3.340, val_loss=3.390]
+Epoch 9:  31%|███       | 4/13 [00:01<00:03,  2.47it/s, loss=3.36, v_num=0, train_loss=3.340, val_loss=3.390]
+Epoch 9:  31%|███       | 4/13 [00:01<00:04,  2.19it/s, loss=3.37, v_num=0, train_loss=3.500, val_loss=3.390]
+Epoch 9:  38%|███▊      | 5/13 [00:01<00:03,  2.55it/s, loss=3.37, v_num=0, train_loss=3.500, val_loss=3.390]
+Epoch 9:  38%|███▊      | 5/13 [00:02<00:03,  2.30it/s, loss=3.38, v_num=0, train_loss=3.460, val_loss=3.390]
+Epoch 9:  46%|████▌     | 6/13 [00:02<00:02,  2.60it/s, loss=3.38, v_num=0, train_loss=3.460, val_loss=3.390]
+Epoch 9:  46%|████▌     | 6/13 [00:02<00:02,  2.38it/s, loss=3.37, v_num=0, train_loss=3.250, val_loss=3.390]
+Epoch 9:  54%|█████▍    | 7/13 [00:02<00:02,  2.64it/s, loss=3.37, v_num=0, train_loss=3.250, val_loss=3.390]
+Epoch 9:  54%|█████▍    | 7/13 [00:02<00:02,  2.44it/s, loss=3.38, v_num=0, train_loss=3.600, val_loss=3.390]
+Epoch 9:  62%|██████▏   | 8/13 [00:03<00:01,  2.66it/s, loss=3.38, v_num=0, train_loss=3.600, val_loss=3.390]
+Epoch 9:  62%|██████▏   | 8/13 [00:03<00:02,  2.48it/s, loss=3.38, v_num=0, train_loss=3.360, val_loss=3.390]
+Epoch 9:  69%|██████▉   | 9/13 [00:03<00:01,  2.69it/s, loss=3.38, v_num=0, train_loss=3.360, val_loss=3.390]
+Epoch 9:  69%|██████▉   | 9/13 [00:03<00:01,  2.53it/s, loss=3.39, v_num=0, train_loss=3.460, val_loss=3.390]
+Epoch 9:  77%|███████▋  | 10/13 [00:03<00:01,  2.70it/s, loss=3.39, v_num=0, train_loss=3.460, val_loss=3.390]
+Epoch 9:  77%|███████▋  | 10/13 [00:03<00:01,  2.56it/s, loss=3.39, v_num=0, train_loss=3.470, val_loss=3.390]
+Epoch 9:  85%|████████▍ | 11/13 [00:04<00:00,  2.75it/s, loss=3.39, v_num=0, train_loss=3.470, val_loss=3.390]
+Epoch 9:  85%|████████▍ | 11/13 [00:04<00:00,  2.66it/s, loss=3.41, v_num=0, train_loss=3.490, val_loss=3.390]
+
+Validation: 0it [00:00, ?it/s][A
+
+Validation:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:  50%|█████     | 1/2 [00:00<00:00,  9.85it/s][A
+Epoch 9:  92%|█████████▏| 12/13 [00:04<00:00,  2.60it/s, loss=3.41, v_num=0, train_loss=3.490, val_loss=3.390]
+
+Validation DataLoader 0: 100%|██████████| 2/2 [00:00<00:00, 10.50it/s][A
+Epoch 9: 100%|██████████| 13/13 [00:04<00:00,  2.76it/s, loss=3.41, v_num=0, train_loss=3.490, val_loss=3.390][rank: 7] Metric val_loss improved by 0.012 >= min_delta = 0.0. New best score: 3.368
+[rank: 3] Metric val_loss improved by 0.021 >= min_delta = 0.0. New best score: 3.375
+
+Epoch 9: 100%|██████████| 13/13 [00:04<00:00,  2.74it/s, loss=3.41, v_num=0, train_loss=3.490, val_loss=3.370]
+
+                                                                      [A
+Epoch 9: 100%|██████████| 13/13 [00:05<00:00,  2.41it/s, loss=3.41, v_num=0, train_loss=3.490, val_loss=3.370]
+Epoch 9:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.41, v_num=0, train_loss=3.490, val_loss=3.370]         
+Epoch 10:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.41, v_num=0, train_loss=3.490, val_loss=3.370]
+Epoch 10:   9%|▉         | 1/11 [00:00<00:05,  1.90it/s, loss=3.41, v_num=0, train_loss=3.490, val_loss=3.370]
+Epoch 10:   9%|▉         | 1/11 [00:00<00:07,  1.36it/s, loss=3.41, v_num=0, train_loss=3.370, val_loss=3.370]
+Epoch 10:  18%|█▊        | 2/11 [00:00<00:03,  2.29it/s, loss=3.41, v_num=0, train_loss=3.370, val_loss=3.370]
+Epoch 10:  18%|█▊        | 2/11 [00:01<00:04,  1.84it/s, loss=3.41, v_num=0, train_loss=3.340, val_loss=3.370]
+Epoch 10:  27%|██▋       | 3/11 [00:01<00:03,  2.49it/s, loss=3.41, v_num=0, train_loss=3.340, val_loss=3.370]
+Epoch 10:  27%|██▋       | 3/11 [00:01<00:03,  2.10it/s, loss=3.42, v_num=0, train_loss=3.420, val_loss=3.370]
+Epoch 10:  36%|███▋      | 4/11 [00:01<00:02,  2.56it/s, loss=3.42, v_num=0, train_loss=3.420, val_loss=3.370]
+Epoch 10:  36%|███▋      | 4/11 [00:01<00:03,  2.25it/s, loss=3.42, v_num=0, train_loss=3.350, val_loss=3.370]
+Epoch 10:  45%|████▌     | 5/11 [00:01<00:02,  2.62it/s, loss=3.42, v_num=0, train_loss=3.350, val_loss=3.370]
+Epoch 10:  45%|████▌     | 5/11 [00:02<00:02,  2.36it/s, loss=3.41, v_num=0, train_loss=3.460, val_loss=3.370]
+Epoch 10:  55%|█████▍    | 6/11 [00:02<00:01,  2.66it/s, loss=3.41, v_num=0, train_loss=3.460, val_loss=3.370]
+Epoch 10:  55%|█████▍    | 6/11 [00:02<00:02,  2.43it/s, loss=3.4, v_num=0, train_loss=3.210, val_loss=3.370] 
+Epoch 10:  64%|██████▎   | 7/11 [00:02<00:01,  2.69it/s, loss=3.4, v_num=0, train_loss=3.210, val_loss=3.370]
+Epoch 10:  64%|██████▎   | 7/11 [00:02<00:01,  2.49it/s, loss=3.4, v_num=0, train_loss=3.310, val_loss=3.370]
+Epoch 10:  73%|███████▎  | 8/11 [00:02<00:01,  2.71it/s, loss=3.4, v_num=0, train_loss=3.310, val_loss=3.370]
+Epoch 10:  73%|███████▎  | 8/11 [00:03<00:01,  2.53it/s, loss=3.39, v_num=0, train_loss=3.370, val_loss=3.370]
+Epoch 10:  82%|████████▏ | 9/11 [00:03<00:00,  2.73it/s, loss=3.39, v_num=0, train_loss=3.370, val_loss=3.370]
+Epoch 10:  82%|████████▏ | 9/11 [00:03<00:00,  2.56it/s, loss=3.39, v_num=0, train_loss=3.460, val_loss=3.370]
+Epoch 10:  91%|█████████ | 10/11 [00:03<00:00,  2.74it/s, loss=3.39, v_num=0, train_loss=3.460, val_loss=3.370]
+Epoch 10:  91%|█████████ | 10/11 [00:03<00:00,  2.59it/s, loss=3.39, v_num=0, train_loss=3.200, val_loss=3.370]
+Epoch 10: 100%|██████████| 11/11 [00:03<00:00,  2.78it/s, loss=3.39, v_num=0, train_loss=3.200, val_loss=3.370]
+Epoch 10: 100%|██████████| 11/11 [00:04<00:00,  2.70it/s, loss=3.37, v_num=0, train_loss=2.980, val_loss=3.370]
+Epoch 10: 100%|██████████| 11/11 [00:04<00:00,  2.70it/s, loss=3.37, v_num=0, train_loss=2.980, val_loss=3.370]
+Epoch 10:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.37, v_num=0, train_loss=2.980, val_loss=3.370]         
+Epoch 11:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.37, v_num=0, train_loss=2.980, val_loss=3.370]
+Epoch 11:   8%|▊         | 1/13 [00:00<00:06,  1.89it/s, loss=3.37, v_num=0, train_loss=2.980, val_loss=3.370]
+Epoch 11:   8%|▊         | 1/13 [00:00<00:08,  1.35it/s, loss=3.36, v_num=0, train_loss=3.220, val_loss=3.370]
+Epoch 11:  15%|█▌        | 2/13 [00:00<00:04,  2.28it/s, loss=3.36, v_num=0, train_loss=3.220, val_loss=3.370]
+Epoch 11:  15%|█▌        | 2/13 [00:01<00:06,  1.66it/s, loss=3.35, v_num=0, train_loss=3.320, val_loss=3.370]
+Epoch 11:  23%|██▎       | 3/13 [00:01<00:04,  2.25it/s, loss=3.35, v_num=0, train_loss=3.320, val_loss=3.370]
+Epoch 11:  23%|██▎       | 3/13 [00:01<00:05,  1.94it/s, loss=3.35, v_num=0, train_loss=3.380, val_loss=3.370]
+Epoch 11:  31%|███       | 4/13 [00:01<00:03,  2.38it/s, loss=3.35, v_num=0, train_loss=3.380, val_loss=3.370]
+Epoch 11:  31%|███       | 4/13 [00:01<00:04,  2.11it/s, loss=3.36, v_num=0, train_loss=3.380, val_loss=3.370]
+Epoch 11:  38%|███▊      | 5/13 [00:02<00:03,  2.47it/s, loss=3.36, v_num=0, train_loss=3.380, val_loss=3.370]
+Epoch 11:  38%|███▊      | 5/13 [00:02<00:03,  2.23it/s, loss=3.34, v_num=0, train_loss=3.290, val_loss=3.370]
+Epoch 11:  46%|████▌     | 6/13 [00:02<00:02,  2.52it/s, loss=3.34, v_num=0, train_loss=3.290, val_loss=3.370]
+Epoch 11:  46%|████▌     | 6/13 [00:02<00:03,  2.31it/s, loss=3.35, v_num=0, train_loss=3.560, val_loss=3.370]
+Epoch 11:  54%|█████▍    | 7/13 [00:02<00:02,  2.57it/s, loss=3.35, v_num=0, train_loss=3.560, val_loss=3.370]
+Epoch 11:  54%|█████▍    | 7/13 [00:02<00:02,  2.38it/s, loss=3.34, v_num=0, train_loss=3.290, val_loss=3.370]
+Epoch 11:  62%|██████▏   | 8/13 [00:03<00:01,  2.60it/s, loss=3.34, v_num=0, train_loss=3.290, val_loss=3.370]
+Epoch 11:  62%|██████▏   | 8/13 [00:03<00:02,  2.43it/s, loss=3.34, v_num=0, train_loss=3.370, val_loss=3.370]
+Epoch 11:  69%|██████▉   | 9/13 [00:03<00:01,  2.63it/s, loss=3.34, v_num=0, train_loss=3.370, val_loss=3.370]
+Epoch 11:  69%|██████▉   | 9/13 [00:03<00:01,  2.48it/s, loss=3.32, v_num=0, train_loss=3.150, val_loss=3.370]
+Epoch 11:  77%|███████▋  | 10/13 [00:03<00:01,  2.65it/s, loss=3.32, v_num=0, train_loss=3.150, val_loss=3.370]
+Epoch 11:  77%|███████▋  | 10/13 [00:03<00:01,  2.51it/s, loss=3.31, v_num=0, train_loss=3.160, val_loss=3.370]
+Epoch 11:  85%|████████▍ | 11/13 [00:04<00:00,  2.70it/s, loss=3.31, v_num=0, train_loss=3.160, val_loss=3.370]
+Epoch 11:  85%|████████▍ | 11/13 [00:04<00:00,  2.61it/s, loss=3.32, v_num=0, train_loss=3.540, val_loss=3.370]
+
+Validation: 0it [00:00, ?it/s][A
+
+Validation:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:  50%|█████     | 1/2 [00:00<00:00,  9.80it/s][A
+Epoch 11:  92%|█████████▏| 12/13 [00:04<00:00,  2.57it/s, loss=3.32, v_num=0, train_loss=3.540, val_loss=3.370]
+
+Validation DataLoader 0: 100%|██████████| 2/2 [00:00<00:00, 10.45it/s][A
+Epoch 11: 100%|██████████| 13/13 [00:04<00:00,  2.73it/s, loss=3.32, v_num=0, train_loss=3.540, val_loss=3.370][rank: 0] Metric val_loss improved by 0.022 >= min_delta = 0.0. New best score: 3.318
+[rank: 4] Metric val_loss improved by 0.048 >= min_delta = 0.0. New best score: 3.348
+[rank: 3] Metric val_loss improved by 0.003 >= min_delta = 0.0. New best score: 3.372
+[rank: 7] Metric val_loss improved by 0.019 >= min_delta = 0.0. New best score: 3.349
+
+Epoch 11: 100%|██████████| 13/13 [00:04<00:00,  2.68it/s, loss=3.32, v_num=0, train_loss=3.540, val_loss=3.320]
+
+                                                                      [A
+Epoch 11: 100%|██████████| 13/13 [00:05<00:00,  2.50it/s, loss=3.32, v_num=0, train_loss=3.540, val_loss=3.320]
+Epoch 11:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.32, v_num=0, train_loss=3.540, val_loss=3.320]         
+Epoch 12:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.32, v_num=0, train_loss=3.540, val_loss=3.320]
+Epoch 12:   9%|▉         | 1/11 [00:00<00:05,  1.92it/s, loss=3.32, v_num=0, train_loss=3.540, val_loss=3.320]
+Epoch 12:   9%|▉         | 1/11 [00:00<00:07,  1.35it/s, loss=3.33, v_num=0, train_loss=3.590, val_loss=3.320]
+Epoch 12:  18%|█▊        | 2/11 [00:00<00:03,  2.30it/s, loss=3.33, v_num=0, train_loss=3.590, val_loss=3.320]
+Epoch 12:  18%|█▊        | 2/11 [00:01<00:04,  1.84it/s, loss=3.34, v_num=0, train_loss=3.580, val_loss=3.320]
+Epoch 12:  27%|██▋       | 3/11 [00:01<00:03,  2.47it/s, loss=3.34, v_num=0, train_loss=3.580, val_loss=3.320]
+Epoch 12:  27%|██▋       | 3/11 [00:01<00:03,  2.09it/s, loss=3.33, v_num=0, train_loss=3.260, val_loss=3.320]
+Epoch 12:  36%|███▋      | 4/11 [00:01<00:02,  2.55it/s, loss=3.33, v_num=0, train_loss=3.260, val_loss=3.320]
+Epoch 12:  36%|███▋      | 4/11 [00:01<00:03,  2.25it/s, loss=3.33, v_num=0, train_loss=3.200, val_loss=3.320]
+Epoch 12:  45%|████▌     | 5/11 [00:01<00:02,  2.62it/s, loss=3.33, v_num=0, train_loss=3.200, val_loss=3.320]
+Epoch 12:  45%|████▌     | 5/11 [00:02<00:02,  2.35it/s, loss=3.34, v_num=0, train_loss=3.410, val_loss=3.320]
+Epoch 12:  55%|█████▍    | 6/11 [00:02<00:01,  2.66it/s, loss=3.34, v_num=0, train_loss=3.410, val_loss=3.320]
+Epoch 12:  55%|█████▍    | 6/11 [00:02<00:02,  2.42it/s, loss=3.33, v_num=0, train_loss=3.290, val_loss=3.320]
+Epoch 12:  64%|██████▎   | 7/11 [00:02<00:01,  2.69it/s, loss=3.33, v_num=0, train_loss=3.290, val_loss=3.320]
+Epoch 12:  64%|██████▎   | 7/11 [00:02<00:01,  2.48it/s, loss=3.33, v_num=0, train_loss=3.460, val_loss=3.320]
+Epoch 12:  73%|███████▎  | 8/11 [00:02<00:01,  2.71it/s, loss=3.33, v_num=0, train_loss=3.460, val_loss=3.320]
+Epoch 12:  73%|███████▎  | 8/11 [00:03<00:01,  2.52it/s, loss=3.33, v_num=0, train_loss=3.210, val_loss=3.320]
+Epoch 12:  82%|████████▏ | 9/11 [00:03<00:00,  2.73it/s, loss=3.33, v_num=0, train_loss=3.210, val_loss=3.320]
+Epoch 12:  82%|████████▏ | 9/11 [00:03<00:00,  2.56it/s, loss=3.35, v_num=0, train_loss=3.420, val_loss=3.320]
+Epoch 12:  91%|█████████ | 10/11 [00:03<00:00,  2.74it/s, loss=3.35, v_num=0, train_loss=3.420, val_loss=3.320]
+Epoch 12:  91%|█████████ | 10/11 [00:03<00:00,  2.58it/s, loss=3.37, v_num=0, train_loss=3.510, val_loss=3.320]
+Epoch 12: 100%|██████████| 11/11 [00:03<00:00,  2.78it/s, loss=3.37, v_num=0, train_loss=3.510, val_loss=3.320]
+Epoch 12: 100%|██████████| 11/11 [00:04<00:00,  2.69it/s, loss=3.38, v_num=0, train_loss=3.560, val_loss=3.320]
+Epoch 12: 100%|██████████| 11/11 [00:04<00:00,  2.69it/s, loss=3.38, v_num=0, train_loss=3.560, val_loss=3.320]
+Epoch 12:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.38, v_num=0, train_loss=3.560, val_loss=3.320]         
+Epoch 13:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.38, v_num=0, train_loss=3.560, val_loss=3.320]
+Epoch 13:   8%|▊         | 1/13 [00:00<00:06,  1.88it/s, loss=3.38, v_num=0, train_loss=3.560, val_loss=3.320]
+Epoch 13:   8%|▊         | 1/13 [00:00<00:09,  1.32it/s, loss=3.38, v_num=0, train_loss=3.340, val_loss=3.320]
+Epoch 13:  15%|█▌        | 2/13 [00:00<00:04,  2.27it/s, loss=3.38, v_num=0, train_loss=3.340, val_loss=3.320]
+Epoch 13:  15%|█▌        | 2/13 [00:01<00:06,  1.66it/s, loss=3.38, v_num=0, train_loss=3.390, val_loss=3.320]
+Epoch 13:  23%|██▎       | 3/13 [00:01<00:04,  2.27it/s, loss=3.38, v_num=0, train_loss=3.390, val_loss=3.320]
+Epoch 13:  23%|██▎       | 3/13 [00:01<00:05,  1.94it/s, loss=3.39, v_num=0, train_loss=3.420, val_loss=3.320]
+Epoch 13:  31%|███       | 4/13 [00:01<00:03,  2.40it/s, loss=3.39, v_num=0, train_loss=3.420, val_loss=3.320]
+Epoch 13:  31%|███       | 4/13 [00:01<00:04,  2.11it/s, loss=3.37, v_num=0, train_loss=3.340, val_loss=3.320]
+Epoch 13:  38%|███▊      | 5/13 [00:02<00:03,  2.48it/s, loss=3.37, v_num=0, train_loss=3.340, val_loss=3.320]
+Epoch 13:  38%|███▊      | 5/13 [00:02<00:03,  2.23it/s, loss=3.37, v_num=0, train_loss=3.270, val_loss=3.320]
+Epoch 13:  46%|████▌     | 6/13 [00:02<00:02,  2.54it/s, loss=3.37, v_num=0, train_loss=3.270, val_loss=3.320]
+Epoch 13:  46%|████▌     | 6/13 [00:02<00:03,  2.31it/s, loss=3.37, v_num=0, train_loss=3.370, val_loss=3.320]
+Epoch 13:  54%|█████▍    | 7/13 [00:02<00:02,  2.58it/s, loss=3.37, v_num=0, train_loss=3.370, val_loss=3.320]
+Epoch 13:  54%|█████▍    | 7/13 [00:02<00:02,  2.38it/s, loss=3.39, v_num=0, train_loss=3.440, val_loss=3.320]
+Epoch 13:  62%|██████▏   | 8/13 [00:03<00:01,  2.61it/s, loss=3.39, v_num=0, train_loss=3.440, val_loss=3.320]
+Epoch 13:  62%|██████▏   | 8/13 [00:03<00:02,  2.43it/s, loss=3.4, v_num=0, train_loss=3.410, val_loss=3.320] 
+Epoch 13:  69%|██████▉   | 9/13 [00:03<00:01,  2.64it/s, loss=3.4, v_num=0, train_loss=3.410, val_loss=3.320]
+Epoch 13:  69%|██████▉   | 9/13 [00:03<00:01,  2.47it/s, loss=3.39, v_num=0, train_loss=3.240, val_loss=3.320]
+Epoch 13:  77%|███████▋  | 10/13 [00:03<00:01,  2.66it/s, loss=3.39, v_num=0, train_loss=3.240, val_loss=3.320]
+Epoch 13:  77%|███████▋  | 10/13 [00:03<00:01,  2.50it/s, loss=3.36, v_num=0, train_loss=3.150, val_loss=3.320]
+Epoch 13:  85%|████████▍ | 11/13 [00:04<00:00,  2.70it/s, loss=3.36, v_num=0, train_loss=3.150, val_loss=3.320]
+Epoch 13:  85%|████████▍ | 11/13 [00:04<00:00,  2.61it/s, loss=3.35, v_num=0, train_loss=3.400, val_loss=3.320]
+
+Validation: 0it [00:00, ?it/s][A
+
+Validation:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:  50%|█████     | 1/2 [00:00<00:00,  9.85it/s][A
+Epoch 13:  92%|█████████▏| 12/13 [00:04<00:00,  2.55it/s, loss=3.35, v_num=0, train_loss=3.400, val_loss=3.320]
+
+Validation DataLoader 0: 100%|██████████| 2/2 [00:00<00:00, 10.48it/s][A
+Epoch 13: 100%|██████████| 13/13 [00:04<00:00,  2.71it/s, loss=3.35, v_num=0, train_loss=3.400, val_loss=3.320][rank: 6] Metric val_loss improved by 0.015 >= min_delta = 0.0. New best score: 3.354
+[rank: 5] Metric val_loss improved by 0.026 >= min_delta = 0.0. New best score: 3.098
+[rank: 2] Metric val_loss improved by 0.012 >= min_delta = 0.0. New best score: 3.336
+[rank: 7] Metric val_loss improved by 0.015 >= min_delta = 0.0. New best score: 3.334
+
+Epoch 13: 100%|██████████| 13/13 [00:04<00:00,  2.66it/s, loss=3.35, v_num=0, train_loss=3.400, val_loss=3.410]
+
+                                                                      [A
+Epoch 13: 100%|██████████| 13/13 [00:05<00:00,  2.49it/s, loss=3.35, v_num=0, train_loss=3.400, val_loss=3.410]
+Epoch 13:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.35, v_num=0, train_loss=3.400, val_loss=3.410]         
+Epoch 14:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.35, v_num=0, train_loss=3.400, val_loss=3.410]
+Epoch 14:   9%|▉         | 1/11 [00:00<00:05,  1.91it/s, loss=3.35, v_num=0, train_loss=3.400, val_loss=3.410]
+Epoch 14:   9%|▉         | 1/11 [00:00<00:07,  1.35it/s, loss=3.35, v_num=0, train_loss=3.140, val_loss=3.410]
+Epoch 14:  18%|█▊        | 2/11 [00:00<00:03,  2.30it/s, loss=3.35, v_num=0, train_loss=3.140, val_loss=3.410]
+Epoch 14:  18%|█▊        | 2/11 [00:01<00:04,  1.84it/s, loss=3.35, v_num=0, train_loss=3.320, val_loss=3.410]
+Epoch 14:  27%|██▋       | 3/11 [00:01<00:03,  2.46it/s, loss=3.35, v_num=0, train_loss=3.320, val_loss=3.410]
+Epoch 14:  27%|██▋       | 3/11 [00:01<00:03,  2.09it/s, loss=3.35, v_num=0, train_loss=3.390, val_loss=3.410]
+Epoch 14:  36%|███▋      | 4/11 [00:01<00:02,  2.55it/s, loss=3.35, v_num=0, train_loss=3.390, val_loss=3.410]
+Epoch 14:  36%|███▋      | 4/11 [00:01<00:03,  2.24it/s, loss=3.35, v_num=0, train_loss=3.230, val_loss=3.410]
+Epoch 14:  45%|████▌     | 5/11 [00:01<00:02,  2.61it/s, loss=3.35, v_num=0, train_loss=3.230, val_loss=3.410]
+Epoch 14:  45%|████▌     | 5/11 [00:02<00:02,  2.35it/s, loss=3.35, v_num=0, train_loss=3.430, val_loss=3.410]
+Epoch 14:  55%|█████▍    | 6/11 [00:02<00:01,  2.65it/s, loss=3.35, v_num=0, train_loss=3.430, val_loss=3.410]
+Epoch 14:  55%|█████▍    | 6/11 [00:02<00:02,  2.42it/s, loss=3.36, v_num=0, train_loss=3.440, val_loss=3.410]
+Epoch 14:  64%|██████▎   | 7/11 [00:02<00:01,  2.68it/s, loss=3.36, v_num=0, train_loss=3.440, val_loss=3.410]
+Epoch 14:  64%|██████▎   | 7/11 [00:02<00:01,  2.47it/s, loss=3.36, v_num=0, train_loss=3.350, val_loss=3.410]
+Epoch 14:  73%|███████▎  | 8/11 [00:02<00:01,  2.70it/s, loss=3.36, v_num=0, train_loss=3.350, val_loss=3.410]
+Epoch 14:  73%|███████▎  | 8/11 [00:03<00:01,  2.51it/s, loss=3.36, v_num=0, train_loss=3.610, val_loss=3.410]
+Epoch 14:  82%|████████▏ | 9/11 [00:03<00:00,  2.72it/s, loss=3.36, v_num=0, train_loss=3.610, val_loss=3.410]
+Epoch 14:  82%|████████▏ | 9/11 [00:03<00:00,  2.55it/s, loss=3.35, v_num=0, train_loss=3.350, val_loss=3.410]
+Epoch 14:  91%|█████████ | 10/11 [00:03<00:00,  2.73it/s, loss=3.35, v_num=0, train_loss=3.350, val_loss=3.410]
+Epoch 14:  91%|█████████ | 10/11 [00:03<00:00,  2.58it/s, loss=3.36, v_num=0, train_loss=3.430, val_loss=3.410]
+Epoch 14: 100%|██████████| 11/11 [00:03<00:00,  2.77it/s, loss=3.36, v_num=0, train_loss=3.430, val_loss=3.410]
+Epoch 14: 100%|██████████| 11/11 [00:04<00:00,  2.68it/s, loss=3.36, v_num=0, train_loss=3.490, val_loss=3.410]
+Epoch 14: 100%|██████████| 11/11 [00:04<00:00,  2.68it/s, loss=3.36, v_num=0, train_loss=3.490, val_loss=3.410]
+Epoch 14:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.36, v_num=0, train_loss=3.490, val_loss=3.410]         
+Epoch 15:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.36, v_num=0, train_loss=3.490, val_loss=3.410]
+Epoch 15:   8%|▊         | 1/13 [00:00<00:06,  1.92it/s, loss=3.36, v_num=0, train_loss=3.490, val_loss=3.410]
+Epoch 15:   8%|▊         | 1/13 [00:00<00:08,  1.35it/s, loss=3.36, v_num=0, train_loss=3.430, val_loss=3.410]
+Epoch 15:  15%|█▌        | 2/13 [00:00<00:04,  2.30it/s, loss=3.36, v_num=0, train_loss=3.430, val_loss=3.410]
+Epoch 15:  15%|█▌        | 2/13 [00:01<00:06,  1.69it/s, loss=3.37, v_num=0, train_loss=3.460, val_loss=3.410]
+Epoch 15:  23%|██▎       | 3/13 [00:01<00:04,  2.29it/s, loss=3.37, v_num=0, train_loss=3.460, val_loss=3.410]
+Epoch 15:  23%|██▎       | 3/13 [00:01<00:05,  1.96it/s, loss=3.38, v_num=0, train_loss=3.590, val_loss=3.410]
+Epoch 15:  31%|███       | 4/13 [00:01<00:03,  2.41it/s, loss=3.38, v_num=0, train_loss=3.590, val_loss=3.410]
+Epoch 15:  31%|███       | 4/13 [00:01<00:04,  2.13it/s, loss=3.38, v_num=0, train_loss=3.400, val_loss=3.410]
+Epoch 15:  38%|███▊      | 5/13 [00:02<00:03,  2.49it/s, loss=3.38, v_num=0, train_loss=3.400, val_loss=3.410]
+Epoch 15:  38%|███▊      | 5/13 [00:02<00:03,  2.25it/s, loss=3.37, v_num=0, train_loss=3.230, val_loss=3.410]
+Epoch 15:  46%|████▌     | 6/13 [00:02<00:02,  2.54it/s, loss=3.37, v_num=0, train_loss=3.230, val_loss=3.410]
+Epoch 15:  46%|████▌     | 6/13 [00:02<00:03,  2.33it/s, loss=3.37, v_num=0, train_loss=3.400, val_loss=3.410]
+Epoch 15:  54%|█████▍    | 7/13 [00:02<00:02,  2.59it/s, loss=3.37, v_num=0, train_loss=3.400, val_loss=3.410]
+Epoch 15:  54%|█████▍    | 7/13 [00:02<00:02,  2.39it/s, loss=3.38, v_num=0, train_loss=3.260, val_loss=3.410]
+Epoch 15:  62%|██████▏   | 8/13 [00:03<00:01,  2.62it/s, loss=3.38, v_num=0, train_loss=3.260, val_loss=3.410]
+Epoch 15:  62%|██████▏   | 8/13 [00:03<00:02,  2.44it/s, loss=3.38, v_num=0, train_loss=3.310, val_loss=3.410]
+Epoch 15:  69%|██████▉   | 9/13 [00:03<00:01,  2.64it/s, loss=3.38, v_num=0, train_loss=3.310, val_loss=3.410]
+Epoch 15:  69%|██████▉   | 9/13 [00:03<00:01,  2.48it/s, loss=3.38, v_num=0, train_loss=3.400, val_loss=3.410]
+Epoch 15:  77%|███████▋  | 10/13 [00:03<00:01,  2.66it/s, loss=3.38, v_num=0, train_loss=3.400, val_loss=3.410]
+Epoch 15:  77%|███████▋  | 10/13 [00:03<00:01,  2.51it/s, loss=3.39, v_num=0, train_loss=3.250, val_loss=3.410]
+Epoch 15:  85%|████████▍ | 11/13 [00:04<00:00,  2.70it/s, loss=3.39, v_num=0, train_loss=3.250, val_loss=3.410]
+Epoch 15:  85%|████████▍ | 11/13 [00:04<00:00,  2.62it/s, loss=3.38, v_num=0, train_loss=3.210, val_loss=3.410]
+
+Validation: 0it [00:00, ?it/s][A
+
+Validation:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:  50%|█████     | 1/2 [00:00<00:00,  9.83it/s][A
+Epoch 15:  92%|█████████▏| 12/13 [00:04<00:00,  2.56it/s, loss=3.38, v_num=0, train_loss=3.210, val_loss=3.410]
+
+Validation DataLoader 0: 100%|██████████| 2/2 [00:00<00:00, 10.47it/s][A
+Epoch 15: 100%|██████████| 13/13 [00:04<00:00,  2.73it/s, loss=3.38, v_num=0, train_loss=3.210, val_loss=3.410]
+Epoch 15: 100%|██████████| 13/13 [00:04<00:00,  2.71it/s, loss=3.38, v_num=0, train_loss=3.210, val_loss=3.420]
+
+                                                                      [A
+Epoch 15: 100%|██████████| 13/13 [00:05<00:00,  2.53it/s, loss=3.38, v_num=0, train_loss=3.210, val_loss=3.420]
+Epoch 15:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.38, v_num=0, train_loss=3.210, val_loss=3.420]         
+Epoch 16:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.38, v_num=0, train_loss=3.210, val_loss=3.420]
+Epoch 16:   9%|▉         | 1/11 [00:00<00:05,  1.93it/s, loss=3.38, v_num=0, train_loss=3.210, val_loss=3.420]
+Epoch 16:   9%|▉         | 1/11 [00:00<00:07,  1.35it/s, loss=3.38, v_num=0, train_loss=3.310, val_loss=3.420]
+Epoch 16:  18%|█▊        | 2/11 [00:00<00:03,  2.31it/s, loss=3.38, v_num=0, train_loss=3.310, val_loss=3.420]
+Epoch 16:  18%|█▊        | 2/11 [00:01<00:04,  1.84it/s, loss=3.39, v_num=0, train_loss=3.420, val_loss=3.420]
+Epoch 16:  27%|██▋       | 3/11 [00:01<00:03,  2.48it/s, loss=3.39, v_num=0, train_loss=3.420, val_loss=3.420]
+Epoch 16:  27%|██▋       | 3/11 [00:01<00:03,  2.10it/s, loss=3.39, v_num=0, train_loss=3.360, val_loss=3.420]
+Epoch 16:  36%|███▋      | 4/11 [00:01<00:02,  2.57it/s, loss=3.39, v_num=0, train_loss=3.360, val_loss=3.420]
+Epoch 16:  36%|███▋      | 4/11 [00:01<00:03,  2.24it/s, loss=3.38, v_num=0, train_loss=3.370, val_loss=3.420]
+Epoch 16:  45%|████▌     | 5/11 [00:01<00:02,  2.63it/s, loss=3.38, v_num=0, train_loss=3.370, val_loss=3.420]
+Epoch 16:  45%|████▌     | 5/11 [00:02<00:02,  2.35it/s, loss=3.38, v_num=0, train_loss=3.310, val_loss=3.420]
+Epoch 16:  55%|█████▍    | 6/11 [00:02<00:01,  2.66it/s, loss=3.38, v_num=0, train_loss=3.310, val_loss=3.420]
+Epoch 16:  55%|█████▍    | 6/11 [00:02<00:02,  2.42it/s, loss=3.35, v_num=0, train_loss=3.070, val_loss=3.420]
+Epoch 16:  64%|██████▎   | 7/11 [00:02<00:01,  2.68it/s, loss=3.35, v_num=0, train_loss=3.070, val_loss=3.420]
+Epoch 16:  64%|██████▎   | 7/11 [00:02<00:01,  2.48it/s, loss=3.36, v_num=0, train_loss=3.380, val_loss=3.420]
+Epoch 16:  73%|███████▎  | 8/11 [00:02<00:01,  2.70it/s, loss=3.36, v_num=0, train_loss=3.380, val_loss=3.420]
+Epoch 16:  73%|███████▎  | 8/11 [00:03<00:01,  2.51it/s, loss=3.36, v_num=0, train_loss=3.510, val_loss=3.420]
+Epoch 16:  82%|████████▏ | 9/11 [00:03<00:00,  2.72it/s, loss=3.36, v_num=0, train_loss=3.510, val_loss=3.420]
+Epoch 16:  82%|████████▏ | 9/11 [00:03<00:00,  2.55it/s, loss=3.35, v_num=0, train_loss=3.250, val_loss=3.420]
+Epoch 16:  91%|█████████ | 10/11 [00:03<00:00,  2.73it/s, loss=3.35, v_num=0, train_loss=3.250, val_loss=3.420]
+Epoch 16:  91%|█████████ | 10/11 [00:03<00:00,  2.57it/s, loss=3.35, v_num=0, train_loss=3.400, val_loss=3.420]
+Epoch 16: 100%|██████████| 11/11 [00:03<00:00,  2.77it/s, loss=3.35, v_num=0, train_loss=3.400, val_loss=3.420]
+Epoch 16: 100%|██████████| 11/11 [00:04<00:00,  2.68it/s, loss=3.35, v_num=0, train_loss=3.480, val_loss=3.420]
+Epoch 16: 100%|██████████| 11/11 [00:04<00:00,  2.68it/s, loss=3.35, v_num=0, train_loss=3.480, val_loss=3.420]
+Epoch 16:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.35, v_num=0, train_loss=3.480, val_loss=3.420]         
+Epoch 17:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.35, v_num=0, train_loss=3.480, val_loss=3.420]
+Epoch 17:   8%|▊         | 1/13 [00:00<00:06,  1.96it/s, loss=3.35, v_num=0, train_loss=3.480, val_loss=3.420]
+Epoch 17:   8%|▊         | 1/13 [00:00<00:08,  1.37it/s, loss=3.33, v_num=0, train_loss=3.180, val_loss=3.420]
+Epoch 17:  15%|█▌        | 2/13 [00:00<00:04,  2.33it/s, loss=3.33, v_num=0, train_loss=3.180, val_loss=3.420]
+Epoch 17:  15%|█▌        | 2/13 [00:01<00:06,  1.81it/s, loss=3.32, v_num=0, train_loss=3.270, val_loss=3.420]
+Epoch 17:  23%|██▎       | 3/13 [00:01<00:04,  2.44it/s, loss=3.32, v_num=0, train_loss=3.270, val_loss=3.420]
+Epoch 17:  23%|██▎       | 3/13 [00:01<00:04,  2.07it/s, loss=3.33, v_num=0, train_loss=3.390, val_loss=3.420]
+Epoch 17:  31%|███       | 4/13 [00:01<00:03,  2.52it/s, loss=3.33, v_num=0, train_loss=3.390, val_loss=3.420]
+Epoch 17:  31%|███       | 4/13 [00:01<00:04,  2.22it/s, loss=3.32, v_num=0, train_loss=3.340, val_loss=3.420]
+Epoch 17:  38%|███▊      | 5/13 [00:01<00:03,  2.59it/s, loss=3.32, v_num=0, train_loss=3.340, val_loss=3.420]
+Epoch 17:  38%|███▊      | 5/13 [00:02<00:03,  2.33it/s, loss=3.34, v_num=0, train_loss=3.610, val_loss=3.420]
+Epoch 17:  46%|████▌     | 6/13 [00:02<00:02,  2.63it/s, loss=3.34, v_num=0, train_loss=3.610, val_loss=3.420]
+Epoch 17:  46%|████▌     | 6/13 [00:02<00:02,  2.39it/s, loss=3.34, v_num=0, train_loss=3.220, val_loss=3.420]
+Epoch 17:  54%|█████▍    | 7/13 [00:02<00:02,  2.66it/s, loss=3.34, v_num=0, train_loss=3.220, val_loss=3.420]
+Epoch 17:  54%|█████▍    | 7/13 [00:02<00:02,  2.45it/s, loss=3.33, v_num=0, train_loss=3.300, val_loss=3.420]
+Epoch 17:  62%|██████▏   | 8/13 [00:02<00:01,  2.68it/s, loss=3.33, v_num=0, train_loss=3.300, val_loss=3.420]
+Epoch 17:  62%|██████▏   | 8/13 [00:03<00:02,  2.50it/s, loss=3.34, v_num=0, train_loss=3.440, val_loss=3.420]
+Epoch 17:  69%|██████▉   | 9/13 [00:03<00:01,  2.70it/s, loss=3.34, v_num=0, train_loss=3.440, val_loss=3.420]
+Epoch 17:  69%|██████▉   | 9/13 [00:03<00:01,  2.54it/s, loss=3.34, v_num=0, train_loss=3.280, val_loss=3.420]
+Epoch 17:  77%|███████▋  | 10/13 [00:03<00:01,  2.72it/s, loss=3.34, v_num=0, train_loss=3.280, val_loss=3.420]
+Epoch 17:  77%|███████▋  | 10/13 [00:03<00:01,  2.56it/s, loss=3.35, v_num=0, train_loss=3.440, val_loss=3.420]
+Epoch 17:  85%|████████▍ | 11/13 [00:03<00:00,  2.75it/s, loss=3.35, v_num=0, train_loss=3.440, val_loss=3.420]
+Epoch 17:  85%|████████▍ | 11/13 [00:04<00:00,  2.66it/s, loss=3.35, v_num=0, train_loss=3.420, val_loss=3.420]
+
+Validation: 0it [00:00, ?it/s][A
+
+Validation:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:  50%|█████     | 1/2 [00:00<00:00,  9.82it/s][A
+Epoch 17:  92%|█████████▏| 12/13 [00:04<00:00,  2.60it/s, loss=3.35, v_num=0, train_loss=3.420, val_loss=3.420]
+
+Validation DataLoader 0: 100%|██████████| 2/2 [00:00<00:00, 10.44it/s][A
+Epoch 17: 100%|██████████| 13/13 [00:04<00:00,  2.76it/s, loss=3.35, v_num=0, train_loss=3.420, val_loss=3.420][rank: 7] Metric val_loss improved by 0.027 >= min_delta = 0.0. New best score: 3.307
+
+Epoch 17: 100%|██████████| 13/13 [00:04<00:00,  2.75it/s, loss=3.35, v_num=0, train_loss=3.420, val_loss=3.370]
+
+                                                                      [A
+Epoch 17: 100%|██████████| 13/13 [00:05<00:00,  2.57it/s, loss=3.35, v_num=0, train_loss=3.420, val_loss=3.370]
+Epoch 17:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.35, v_num=0, train_loss=3.420, val_loss=3.370]         
+Epoch 18:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.35, v_num=0, train_loss=3.420, val_loss=3.370]
+Epoch 18:   9%|▉         | 1/11 [00:00<00:05,  1.82it/s, loss=3.35, v_num=0, train_loss=3.420, val_loss=3.370]
+Epoch 18:   9%|▉         | 1/11 [00:00<00:07,  1.31it/s, loss=3.35, v_num=0, train_loss=3.310, val_loss=3.370]
+Epoch 18:  18%|█▊        | 2/11 [00:00<00:04,  2.23it/s, loss=3.35, v_num=0, train_loss=3.310, val_loss=3.370]
+Epoch 18:  18%|█▊        | 2/11 [00:01<00:04,  1.80it/s, loss=3.35, v_num=0, train_loss=3.320, val_loss=3.370]
+Epoch 18:  27%|██▋       | 3/11 [00:01<00:03,  2.42it/s, loss=3.35, v_num=0, train_loss=3.320, val_loss=3.370]
+Epoch 18:  27%|██▋       | 3/11 [00:01<00:03,  2.06it/s, loss=3.35, v_num=0, train_loss=3.300, val_loss=3.370]
+Epoch 18:  36%|███▋      | 4/11 [00:01<00:02,  2.52it/s, loss=3.35, v_num=0, train_loss=3.300, val_loss=3.370]
+Epoch 18:  36%|███▋      | 4/11 [00:01<00:03,  2.22it/s, loss=3.36, v_num=0, train_loss=3.400, val_loss=3.370]
+Epoch 18:  45%|████▌     | 5/11 [00:01<00:02,  2.58it/s, loss=3.36, v_num=0, train_loss=3.400, val_loss=3.370]
+Epoch 18:  45%|████▌     | 5/11 [00:02<00:02,  2.32it/s, loss=3.36, v_num=0, train_loss=3.430, val_loss=3.370]
+Epoch 18:  55%|█████▍    | 6/11 [00:02<00:01,  2.62it/s, loss=3.36, v_num=0, train_loss=3.430, val_loss=3.370]
+Epoch 18:  55%|█████▍    | 6/11 [00:02<00:02,  2.39it/s, loss=3.36, v_num=0, train_loss=3.440, val_loss=3.370]
+Epoch 18:  64%|██████▎   | 7/11 [00:02<00:01,  2.66it/s, loss=3.36, v_num=0, train_loss=3.440, val_loss=3.370]
+Epoch 18:  64%|██████▎   | 7/11 [00:02<00:01,  2.46it/s, loss=3.36, v_num=0, train_loss=3.270, val_loss=3.370]
+Epoch 18:  73%|███████▎  | 8/11 [00:02<00:01,  2.68it/s, loss=3.36, v_num=0, train_loss=3.270, val_loss=3.370]
+Epoch 18:  73%|███████▎  | 8/11 [00:03<00:01,  2.50it/s, loss=3.37, v_num=0, train_loss=3.600, val_loss=3.370]
+Epoch 18:  82%|████████▏ | 9/11 [00:03<00:00,  2.70it/s, loss=3.37, v_num=0, train_loss=3.600, val_loss=3.370]
+Epoch 18:  82%|████████▏ | 9/11 [00:03<00:00,  2.54it/s, loss=3.37, v_num=0, train_loss=3.530, val_loss=3.370]
+Epoch 18:  91%|█████████ | 10/11 [00:03<00:00,  2.72it/s, loss=3.37, v_num=0, train_loss=3.530, val_loss=3.370]
+Epoch 18:  91%|█████████ | 10/11 [00:03<00:00,  2.56it/s, loss=3.39, v_num=0, train_loss=3.490, val_loss=3.370]
+Epoch 18: 100%|██████████| 11/11 [00:03<00:00,  2.75it/s, loss=3.39, v_num=0, train_loss=3.490, val_loss=3.370]
+Epoch 18: 100%|██████████| 11/11 [00:04<00:00,  2.67it/s, loss=3.4, v_num=0, train_loss=3.390, val_loss=3.370] 
+Epoch 18: 100%|██████████| 11/11 [00:04<00:00,  2.67it/s, loss=3.4, v_num=0, train_loss=3.390, val_loss=3.370]
+Epoch 18:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.4, v_num=0, train_loss=3.390, val_loss=3.370]         
+Epoch 19:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.4, v_num=0, train_loss=3.390, val_loss=3.370]
+Epoch 19:   8%|▊         | 1/13 [00:00<00:06,  1.87it/s, loss=3.4, v_num=0, train_loss=3.390, val_loss=3.370]
+Epoch 19:   8%|▊         | 1/13 [00:00<00:08,  1.34it/s, loss=3.39, v_num=0, train_loss=3.340, val_loss=3.370]
+Epoch 19:  15%|█▌        | 2/13 [00:00<00:04,  2.26it/s, loss=3.39, v_num=0, train_loss=3.340, val_loss=3.370]
+Epoch 19:  15%|█▌        | 2/13 [00:01<00:06,  1.68it/s, loss=3.39, v_num=0, train_loss=3.280, val_loss=3.370]
+Epoch 19:  23%|██▎       | 3/13 [00:01<00:04,  2.28it/s, loss=3.39, v_num=0, train_loss=3.280, val_loss=3.370]
+Epoch 19:  23%|██▎       | 3/13 [00:01<00:05,  1.96it/s, loss=3.37, v_num=0, train_loss=3.180, val_loss=3.370]
+Epoch 19:  31%|███       | 4/13 [00:01<00:03,  2.40it/s, loss=3.37, v_num=0, train_loss=3.180, val_loss=3.370]
+Epoch 19:  31%|███       | 4/13 [00:01<00:04,  2.12it/s, loss=3.38, v_num=0, train_loss=3.390, val_loss=3.370]
+Epoch 19:  38%|███▊      | 5/13 [00:02<00:03,  2.48it/s, loss=3.38, v_num=0, train_loss=3.390, val_loss=3.370]
+Epoch 19:  38%|███▊      | 5/13 [00:02<00:03,  2.24it/s, loss=3.38, v_num=0, train_loss=3.400, val_loss=3.370]
+Epoch 19:  46%|████▌     | 6/13 [00:02<00:02,  2.54it/s, loss=3.38, v_num=0, train_loss=3.400, val_loss=3.370]
+Epoch 19:  46%|████▌     | 6/13 [00:02<00:03,  2.32it/s, loss=3.39, v_num=0, train_loss=3.490, val_loss=3.370]
+Epoch 19:  54%|█████▍    | 7/13 [00:02<00:02,  2.58it/s, loss=3.39, v_num=0, train_loss=3.490, val_loss=3.370]
+Epoch 19:  54%|█████▍    | 7/13 [00:02<00:02,  2.39it/s, loss=3.39, v_num=0, train_loss=3.400, val_loss=3.370]
+Epoch 19:  62%|██████▏   | 8/13 [00:03<00:01,  2.61it/s, loss=3.39, v_num=0, train_loss=3.400, val_loss=3.370]
+Epoch 19:  62%|██████▏   | 8/13 [00:03<00:02,  2.44it/s, loss=3.4, v_num=0, train_loss=3.580, val_loss=3.370] 
+Epoch 19:  69%|██████▉   | 9/13 [00:03<00:01,  2.64it/s, loss=3.4, v_num=0, train_loss=3.580, val_loss=3.370]
+Epoch 19:  69%|██████▉   | 9/13 [00:03<00:01,  2.48it/s, loss=3.41, v_num=0, train_loss=3.560, val_loss=3.370]
+Epoch 19:  77%|███████▋  | 10/13 [00:03<00:01,  2.66it/s, loss=3.41, v_num=0, train_loss=3.560, val_loss=3.370]
+Epoch 19:  77%|███████▋  | 10/13 [00:03<00:01,  2.51it/s, loss=3.41, v_num=0, train_loss=3.420, val_loss=3.370]
+Epoch 19:  85%|████████▍ | 11/13 [00:04<00:00,  2.70it/s, loss=3.41, v_num=0, train_loss=3.420, val_loss=3.370]
+Epoch 19:  85%|████████▍ | 11/13 [00:04<00:00,  2.62it/s, loss=3.42, v_num=0, train_loss=3.490, val_loss=3.370]
+
+Validation: 0it [00:00, ?it/s][A
+
+Validation:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:  50%|█████     | 1/2 [00:00<00:00,  9.79it/s][A
+Epoch 19:  92%|█████████▏| 12/13 [00:04<00:00,  2.55it/s, loss=3.42, v_num=0, train_loss=3.490, val_loss=3.370]
+
+Validation DataLoader 0: 100%|██████████| 2/2 [00:00<00:00, 10.42it/s][A
+Epoch 19: 100%|██████████| 13/13 [00:04<00:00,  2.71it/s, loss=3.42, v_num=0, train_loss=3.490, val_loss=3.370]
+Epoch 19: 100%|██████████| 13/13 [00:04<00:00,  2.65it/s, loss=3.42, v_num=0, train_loss=3.490, val_loss=3.360]
+
+                                                                      [A
+Epoch 19: 100%|██████████| 13/13 [00:05<00:00,  2.48it/s, loss=3.42, v_num=0, train_loss=3.490, val_loss=3.360]
+Epoch 19:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.42, v_num=0, train_loss=3.490, val_loss=3.360]         
+Epoch 20:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.42, v_num=0, train_loss=3.490, val_loss=3.360]
+Epoch 20:   9%|▉         | 1/11 [00:00<00:05,  1.89it/s, loss=3.42, v_num=0, train_loss=3.490, val_loss=3.360]
+Epoch 20:   9%|▉         | 1/11 [00:00<00:07,  1.34it/s, loss=3.42, v_num=0, train_loss=3.280, val_loss=3.360]
+Epoch 20:  18%|█▊        | 2/11 [00:00<00:03,  2.27it/s, loss=3.42, v_num=0, train_loss=3.280, val_loss=3.360]
+Epoch 20:  18%|█▊        | 2/11 [00:01<00:04,  1.83it/s, loss=3.43, v_num=0, train_loss=3.550, val_loss=3.360]
+Epoch 20:  27%|██▋       | 3/11 [00:01<00:03,  2.46it/s, loss=3.43, v_num=0, train_loss=3.550, val_loss=3.360]
+Epoch 20:  27%|██▋       | 3/11 [00:01<00:03,  2.09it/s, loss=3.43, v_num=0, train_loss=3.490, val_loss=3.360]
+Epoch 20:  36%|███▋      | 4/11 [00:01<00:02,  2.54it/s, loss=3.43, v_num=0, train_loss=3.490, val_loss=3.360]
+Epoch 20:  36%|███▋      | 4/11 [00:01<00:03,  2.23it/s, loss=3.42, v_num=0, train_loss=3.340, val_loss=3.360]
+Epoch 20:  45%|████▌     | 5/11 [00:01<00:02,  2.61it/s, loss=3.42, v_num=0, train_loss=3.340, val_loss=3.360]
+Epoch 20:  45%|████▌     | 5/11 [00:02<00:02,  2.34it/s, loss=3.44, v_num=0, train_loss=3.490, val_loss=3.360]
+Epoch 20:  55%|█████▍    | 6/11 [00:02<00:01,  2.65it/s, loss=3.44, v_num=0, train_loss=3.490, val_loss=3.360]
+Epoch 20:  55%|█████▍    | 6/11 [00:02<00:02,  2.41it/s, loss=3.43, v_num=0, train_loss=3.540, val_loss=3.360]
+Epoch 20:  64%|██████▎   | 7/11 [00:02<00:01,  2.68it/s, loss=3.43, v_num=0, train_loss=3.540, val_loss=3.360]
+Epoch 20:  64%|██████▎   | 7/11 [00:02<00:01,  2.47it/s, loss=3.43, v_num=0, train_loss=3.500, val_loss=3.360]
+Epoch 20:  73%|███████▎  | 8/11 [00:02<00:01,  2.69it/s, loss=3.43, v_num=0, train_loss=3.500, val_loss=3.360]
+Epoch 20:  73%|███████▎  | 8/11 [00:03<00:01,  2.51it/s, loss=3.43, v_num=0, train_loss=3.420, val_loss=3.360]
+Epoch 20:  82%|████████▏ | 9/11 [00:03<00:00,  2.71it/s, loss=3.43, v_num=0, train_loss=3.420, val_loss=3.360]
+Epoch 20:  82%|████████▏ | 9/11 [00:03<00:00,  2.55it/s, loss=3.42, v_num=0, train_loss=3.260, val_loss=3.360]
+Epoch 20:  91%|█████████ | 10/11 [00:03<00:00,  2.72it/s, loss=3.42, v_num=0, train_loss=3.260, val_loss=3.360]
+Epoch 20:  91%|█████████ | 10/11 [00:03<00:00,  2.57it/s, loss=3.43, v_num=0, train_loss=3.520, val_loss=3.360]
+Epoch 20: 100%|██████████| 11/11 [00:03<00:00,  2.76it/s, loss=3.43, v_num=0, train_loss=3.520, val_loss=3.360]
+Epoch 20: 100%|██████████| 11/11 [00:04<00:00,  2.68it/s, loss=3.43, v_num=0, train_loss=3.220, val_loss=3.360]
+Epoch 20: 100%|██████████| 11/11 [00:04<00:00,  2.68it/s, loss=3.43, v_num=0, train_loss=3.220, val_loss=3.360]
+Epoch 20:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.43, v_num=0, train_loss=3.220, val_loss=3.360]         
+Epoch 21:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.43, v_num=0, train_loss=3.220, val_loss=3.360]
+Epoch 21:   8%|▊         | 1/13 [00:00<00:06,  1.84it/s, loss=3.43, v_num=0, train_loss=3.220, val_loss=3.360]
+Epoch 21:   8%|▊         | 1/13 [00:00<00:09,  1.32it/s, loss=3.43, v_num=0, train_loss=3.300, val_loss=3.360]
+Epoch 21:  15%|█▌        | 2/13 [00:00<00:04,  2.23it/s, loss=3.43, v_num=0, train_loss=3.300, val_loss=3.360]
+Epoch 21:  15%|█▌        | 2/13 [00:01<00:06,  1.72it/s, loss=3.43, v_num=0, train_loss=3.390, val_loss=3.360]
+Epoch 21:  23%|██▎       | 3/13 [00:01<00:04,  2.32it/s, loss=3.43, v_num=0, train_loss=3.390, val_loss=3.360]
+Epoch 21:  23%|██▎       | 3/13 [00:01<00:05,  1.99it/s, loss=3.43, v_num=0, train_loss=3.360, val_loss=3.360]
+Epoch 21:  31%|███       | 4/13 [00:01<00:03,  2.43it/s, loss=3.43, v_num=0, train_loss=3.360, val_loss=3.360]
+Epoch 21:  31%|███       | 4/13 [00:01<00:04,  2.15it/s, loss=3.43, v_num=0, train_loss=3.490, val_loss=3.360]
+Epoch 21:  38%|███▊      | 5/13 [00:01<00:03,  2.51it/s, loss=3.43, v_num=0, train_loss=3.490, val_loss=3.360]
+Epoch 21:  38%|███▊      | 5/13 [00:02<00:03,  2.27it/s, loss=3.43, v_num=0, train_loss=3.420, val_loss=3.360]
+Epoch 21:  46%|████▌     | 6/13 [00:02<00:02,  2.56it/s, loss=3.43, v_num=0, train_loss=3.420, val_loss=3.360]
+Epoch 21:  46%|████▌     | 6/13 [00:02<00:02,  2.34it/s, loss=3.42, v_num=0, train_loss=3.350, val_loss=3.360]
+Epoch 21:  54%|█████▍    | 7/13 [00:02<00:02,  2.60it/s, loss=3.42, v_num=0, train_loss=3.350, val_loss=3.360]
+Epoch 21:  54%|█████▍    | 7/13 [00:02<00:02,  2.41it/s, loss=3.4, v_num=0, train_loss=3.250, val_loss=3.360] 
+Epoch 21:  62%|██████▏   | 8/13 [00:03<00:01,  2.63it/s, loss=3.4, v_num=0, train_loss=3.250, val_loss=3.360]
+Epoch 21:  62%|██████▏   | 8/13 [00:03<00:02,  2.45it/s, loss=3.4, v_num=0, train_loss=3.310, val_loss=3.360]
+Epoch 21:  69%|██████▉   | 9/13 [00:03<00:01,  2.65it/s, loss=3.4, v_num=0, train_loss=3.310, val_loss=3.360]
+Epoch 21:  69%|██████▉   | 9/13 [00:03<00:01,  2.49it/s, loss=3.4, v_num=0, train_loss=3.580, val_loss=3.360]
+Epoch 21:  77%|███████▋  | 10/13 [00:03<00:01,  2.67it/s, loss=3.4, v_num=0, train_loss=3.580, val_loss=3.360]
+Epoch 21:  77%|███████▋  | 10/13 [00:03<00:01,  2.52it/s, loss=3.41, v_num=0, train_loss=3.500, val_loss=3.360]
+Epoch 21:  85%|████████▍ | 11/13 [00:04<00:00,  2.71it/s, loss=3.41, v_num=0, train_loss=3.500, val_loss=3.360]
+Epoch 21:  85%|████████▍ | 11/13 [00:04<00:00,  2.63it/s, loss=3.41, v_num=0, train_loss=3.450, val_loss=3.360]
+
+Validation: 0it [00:00, ?it/s][A
+
+Validation:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:  50%|█████     | 1/2 [00:00<00:00,  9.81it/s][A
+Epoch 21:  92%|█████████▏| 12/13 [00:04<00:00,  2.56it/s, loss=3.41, v_num=0, train_loss=3.450, val_loss=3.360]
+
+Validation DataLoader 0: 100%|██████████| 2/2 [00:00<00:00, 10.44it/s][A
+Epoch 21: 100%|██████████| 13/13 [00:04<00:00,  2.72it/s, loss=3.41, v_num=0, train_loss=3.450, val_loss=3.360][rank: 6] Metric val_loss improved by 0.041 >= min_delta = 0.0. New best score: 3.312
+
+Epoch 21: 100%|██████████| 13/13 [00:04<00:00,  2.71it/s, loss=3.41, v_num=0, train_loss=3.450, val_loss=3.370]
+
+                                                                      [A
+Epoch 21: 100%|██████████| 13/13 [00:05<00:00,  2.53it/s, loss=3.41, v_num=0, train_loss=3.450, val_loss=3.370]
+Epoch 21:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.41, v_num=0, train_loss=3.450, val_loss=3.370]         
+Epoch 22:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.41, v_num=0, train_loss=3.450, val_loss=3.370]
+Epoch 22:   9%|▉         | 1/11 [00:00<00:05,  1.95it/s, loss=3.41, v_num=0, train_loss=3.450, val_loss=3.370]
+Epoch 22:   9%|▉         | 1/11 [00:00<00:07,  1.37it/s, loss=3.4, v_num=0, train_loss=3.310, val_loss=3.370] 
+Epoch 22:  18%|█▊        | 2/11 [00:00<00:03,  2.31it/s, loss=3.4, v_num=0, train_loss=3.310, val_loss=3.370]
+Epoch 22:  18%|█▊        | 2/11 [00:01<00:04,  1.86it/s, loss=3.4, v_num=0, train_loss=3.350, val_loss=3.370]
+Epoch 22:  27%|██▋       | 3/11 [00:01<00:03,  2.49it/s, loss=3.4, v_num=0, train_loss=3.350, val_loss=3.370]
+Epoch 22:  27%|██▋       | 3/11 [00:01<00:03,  2.11it/s, loss=3.4, v_num=0, train_loss=3.510, val_loss=3.370]
+Epoch 22:  36%|███▋      | 4/11 [00:01<00:02,  2.57it/s, loss=3.4, v_num=0, train_loss=3.510, val_loss=3.370]
+Epoch 22:  36%|███▋      | 4/11 [00:01<00:03,  2.26it/s, loss=3.4, v_num=0, train_loss=3.500, val_loss=3.370]
+Epoch 22:  45%|████▌     | 5/11 [00:01<00:02,  2.63it/s, loss=3.4, v_num=0, train_loss=3.500, val_loss=3.370]
+Epoch 22:  45%|████▌     | 5/11 [00:02<00:02,  2.36it/s, loss=3.39, v_num=0, train_loss=3.320, val_loss=3.370]
+Epoch 22:  55%|█████▍    | 6/11 [00:02<00:01,  2.66it/s, loss=3.39, v_num=0, train_loss=3.320, val_loss=3.370]
+Epoch 22:  55%|█████▍    | 6/11 [00:02<00:02,  2.43it/s, loss=3.38, v_num=0, train_loss=3.290, val_loss=3.370]
+Epoch 22:  64%|██████▎   | 7/11 [00:02<00:01,  2.69it/s, loss=3.38, v_num=0, train_loss=3.290, val_loss=3.370]
+Epoch 22:  64%|██████▎   | 7/11 [00:02<00:01,  2.48it/s, loss=3.39, v_num=0, train_loss=3.320, val_loss=3.370]
+Epoch 22:  73%|███████▎  | 8/11 [00:02<00:01,  2.71it/s, loss=3.39, v_num=0, train_loss=3.320, val_loss=3.370]
+Epoch 22:  73%|███████▎  | 8/11 [00:03<00:01,  2.52it/s, loss=3.37, v_num=0, train_loss=3.290, val_loss=3.370]
+Epoch 22:  82%|████████▏ | 9/11 [00:03<00:00,  2.73it/s, loss=3.37, v_num=0, train_loss=3.290, val_loss=3.370]
+Epoch 22:  82%|████████▏ | 9/11 [00:03<00:00,  2.56it/s, loss=3.38, v_num=0, train_loss=3.420, val_loss=3.370]
+Epoch 22:  91%|█████████ | 10/11 [00:03<00:00,  2.74it/s, loss=3.38, v_num=0, train_loss=3.420, val_loss=3.370]
+Epoch 22:  91%|█████████ | 10/11 [00:03<00:00,  2.58it/s, loss=3.4, v_num=0, train_loss=3.500, val_loss=3.370] 
+Epoch 22: 100%|██████████| 11/11 [00:03<00:00,  2.77it/s, loss=3.4, v_num=0, train_loss=3.500, val_loss=3.370]
+Epoch 22: 100%|██████████| 11/11 [00:04<00:00,  2.69it/s, loss=3.4, v_num=0, train_loss=3.430, val_loss=3.370]
+Epoch 22: 100%|██████████| 11/11 [00:04<00:00,  2.69it/s, loss=3.4, v_num=0, train_loss=3.430, val_loss=3.370]
+Epoch 22:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.4, v_num=0, train_loss=3.430, val_loss=3.370]         
+Epoch 23:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.4, v_num=0, train_loss=3.430, val_loss=3.370]
+Epoch 23:   8%|▊         | 1/13 [00:00<00:06,  1.93it/s, loss=3.4, v_num=0, train_loss=3.430, val_loss=3.370]
+Epoch 23:   8%|▊         | 1/13 [00:00<00:08,  1.37it/s, loss=3.39, v_num=0, train_loss=3.310, val_loss=3.370]
+Epoch 23:  15%|█▌        | 2/13 [00:00<00:04,  2.30it/s, loss=3.39, v_num=0, train_loss=3.310, val_loss=3.370]
+Epoch 23:  15%|█▌        | 2/13 [00:01<00:06,  1.76it/s, loss=3.38, v_num=0, train_loss=3.270, val_loss=3.370]
+Epoch 23:  23%|██▎       | 3/13 [00:01<00:04,  2.37it/s, loss=3.38, v_num=0, train_loss=3.270, val_loss=3.370]
+Epoch 23:  23%|██▎       | 3/13 [00:01<00:04,  2.02it/s, loss=3.36, v_num=0, train_loss=2.930, val_loss=3.370]
+Epoch 23:  31%|███       | 4/13 [00:01<00:03,  2.47it/s, loss=3.36, v_num=0, train_loss=2.930, val_loss=3.370]
+Epoch 23:  31%|███       | 4/13 [00:01<00:04,  2.18it/s, loss=3.36, v_num=0, train_loss=3.450, val_loss=3.370]
+Epoch 23:  38%|███▊      | 5/13 [00:01<00:03,  2.54it/s, loss=3.36, v_num=0, train_loss=3.450, val_loss=3.370]
+Epoch 23:  38%|███▊      | 5/13 [00:02<00:03,  2.29it/s, loss=3.37, v_num=0, train_loss=3.330, val_loss=3.370]
+Epoch 23:  46%|████▌     | 6/13 [00:02<00:02,  2.58it/s, loss=3.37, v_num=0, train_loss=3.330, val_loss=3.370]
+Epoch 23:  46%|████▌     | 6/13 [00:02<00:02,  2.36it/s, loss=3.37, v_num=0, train_loss=3.380, val_loss=3.370]
+Epoch 23:  54%|█████▍    | 7/13 [00:02<00:02,  2.62it/s, loss=3.37, v_num=0, train_loss=3.380, val_loss=3.370]
+Epoch 23:  54%|█████▍    | 7/13 [00:02<00:02,  2.43it/s, loss=3.37, v_num=0, train_loss=3.580, val_loss=3.370]
+Epoch 23:  62%|██████▏   | 8/13 [00:03<00:01,  2.65it/s, loss=3.37, v_num=0, train_loss=3.580, val_loss=3.370]
+Epoch 23:  62%|██████▏   | 8/13 [00:03<00:02,  2.47it/s, loss=3.36, v_num=0, train_loss=3.270, val_loss=3.370]
+Epoch 23:  69%|██████▉   | 9/13 [00:03<00:01,  2.67it/s, loss=3.36, v_num=0, train_loss=3.270, val_loss=3.370]
+Epoch 23:  69%|██████▉   | 9/13 [00:03<00:01,  2.51it/s, loss=3.36, v_num=0, train_loss=3.530, val_loss=3.370]
+Epoch 23:  77%|███████▋  | 10/13 [00:03<00:01,  2.69it/s, loss=3.36, v_num=0, train_loss=3.530, val_loss=3.370]
+Epoch 23:  77%|███████▋  | 10/13 [00:03<00:01,  2.54it/s, loss=3.36, v_num=0, train_loss=3.220, val_loss=3.370]
+Epoch 23:  85%|████████▍ | 11/13 [00:04<00:00,  2.73it/s, loss=3.36, v_num=0, train_loss=3.220, val_loss=3.370]
+Epoch 23:  85%|████████▍ | 11/13 [00:04<00:00,  2.64it/s, loss=3.37, v_num=0, train_loss=3.580, val_loss=3.370]
+
+Validation: 0it [00:00, ?it/s][A
+
+Validation:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:  50%|█████     | 1/2 [00:00<00:00,  9.80it/s][A
+Epoch 23:  92%|█████████▏| 12/13 [00:04<00:00,  2.58it/s, loss=3.37, v_num=0, train_loss=3.580, val_loss=3.370]
+
+Validation DataLoader 0: 100%|██████████| 2/2 [00:00<00:00, 10.43it/s][A
+Epoch 23: 100%|██████████| 13/13 [00:04<00:00,  2.74it/s, loss=3.37, v_num=0, train_loss=3.580, val_loss=3.370][rank: 0] Metric val_loss improved by 0.015 >= min_delta = 0.0. New best score: 3.304
+
+Epoch 23: 100%|██████████| 13/13 [00:04<00:00,  2.73it/s, loss=3.37, v_num=0, train_loss=3.580, val_loss=3.300]
+
+                                                                      [A
+Epoch 23: 100%|██████████| 13/13 [00:05<00:00,  2.55it/s, loss=3.37, v_num=0, train_loss=3.580, val_loss=3.300]
+Epoch 23:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.37, v_num=0, train_loss=3.580, val_loss=3.300]         
+Epoch 24:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.37, v_num=0, train_loss=3.580, val_loss=3.300]
+Epoch 24:   9%|▉         | 1/11 [00:00<00:04,  2.01it/s, loss=3.37, v_num=0, train_loss=3.580, val_loss=3.300]
+Epoch 24:   9%|▉         | 1/11 [00:00<00:07,  1.41it/s, loss=3.36, v_num=0, train_loss=3.280, val_loss=3.300]
+Epoch 24:  18%|█▊        | 2/11 [00:00<00:03,  2.36it/s, loss=3.36, v_num=0, train_loss=3.280, val_loss=3.300]
+Epoch 24:  18%|█▊        | 2/11 [00:01<00:04,  1.89it/s, loss=3.36, v_num=0, train_loss=3.530, val_loss=3.300]
+Epoch 24:  27%|██▋       | 3/11 [00:01<00:03,  2.53it/s, loss=3.36, v_num=0, train_loss=3.530, val_loss=3.300]
+Epoch 24:  27%|██▋       | 3/11 [00:01<00:03,  2.14it/s, loss=3.35, v_num=0, train_loss=3.150, val_loss=3.300]
+Epoch 24:  36%|███▋      | 4/11 [00:01<00:02,  2.60it/s, loss=3.35, v_num=0, train_loss=3.150, val_loss=3.300]
+Epoch 24:  36%|███▋      | 4/11 [00:01<00:03,  2.28it/s, loss=3.37, v_num=0, train_loss=3.560, val_loss=3.300]
+Epoch 24:  45%|████▌     | 5/11 [00:01<00:02,  2.65it/s, loss=3.37, v_num=0, train_loss=3.560, val_loss=3.300]
+Epoch 24:  45%|████▌     | 5/11 [00:02<00:02,  2.38it/s, loss=3.37, v_num=0, train_loss=3.440, val_loss=3.300]
+Epoch 24:  55%|█████▍    | 6/11 [00:02<00:01,  2.68it/s, loss=3.37, v_num=0, train_loss=3.440, val_loss=3.300]
+Epoch 24:  55%|█████▍    | 6/11 [00:02<00:02,  2.45it/s, loss=3.38, v_num=0, train_loss=3.350, val_loss=3.300]
+Epoch 24:  64%|██████▎   | 7/11 [00:02<00:01,  2.71it/s, loss=3.38, v_num=0, train_loss=3.350, val_loss=3.300]
+Epoch 24:  64%|██████▎   | 7/11 [00:02<00:01,  2.50it/s, loss=3.39, v_num=0, train_loss=3.610, val_loss=3.300]
+Epoch 24:  73%|███████▎  | 8/11 [00:02<00:01,  2.73it/s, loss=3.39, v_num=0, train_loss=3.610, val_loss=3.300]
+Epoch 24:  73%|███████▎  | 8/11 [00:03<00:01,  2.54it/s, loss=3.38, v_num=0, train_loss=3.320, val_loss=3.300]
+Epoch 24:  82%|████████▏ | 9/11 [00:03<00:00,  2.74it/s, loss=3.38, v_num=0, train_loss=3.320, val_loss=3.300]
+Epoch 24:  82%|████████▏ | 9/11 [00:03<00:00,  2.57it/s, loss=3.36, v_num=0, train_loss=3.070, val_loss=3.300]
+Epoch 24:  91%|█████████ | 10/11 [00:03<00:00,  2.75it/s, loss=3.36, v_num=0, train_loss=3.070, val_loss=3.300]
+Epoch 24:  91%|█████████ | 10/11 [00:03<00:00,  2.60it/s, loss=3.35, v_num=0, train_loss=3.170, val_loss=3.300]
+Epoch 24: 100%|██████████| 11/11 [00:03<00:00,  2.79it/s, loss=3.35, v_num=0, train_loss=3.170, val_loss=3.300]
+Epoch 24: 100%|██████████| 11/11 [00:04<00:00,  2.70it/s, loss=3.37, v_num=0, train_loss=3.700, val_loss=3.300]
+Epoch 24: 100%|██████████| 11/11 [00:04<00:00,  2.70it/s, loss=3.37, v_num=0, train_loss=3.700, val_loss=3.300]
+Epoch 24:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.37, v_num=0, train_loss=3.700, val_loss=3.300]         
+Epoch 25:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.37, v_num=0, train_loss=3.700, val_loss=3.300]
+Epoch 25:   8%|▊         | 1/13 [00:00<00:06,  1.84it/s, loss=3.37, v_num=0, train_loss=3.700, val_loss=3.300]
+Epoch 25:   8%|▊         | 1/13 [00:00<00:09,  1.32it/s, loss=3.38, v_num=0, train_loss=3.180, val_loss=3.300]
+Epoch 25:  15%|█▌        | 2/13 [00:00<00:04,  2.23it/s, loss=3.38, v_num=0, train_loss=3.180, val_loss=3.300]
+Epoch 25:  15%|█▌        | 2/13 [00:01<00:06,  1.68it/s, loss=3.38, v_num=0, train_loss=3.280, val_loss=3.300]
+Epoch 25:  23%|██▎       | 3/13 [00:01<00:04,  2.28it/s, loss=3.38, v_num=0, train_loss=3.280, val_loss=3.300]
+Epoch 25:  23%|██▎       | 3/13 [00:01<00:05,  1.96it/s, loss=3.37, v_num=0, train_loss=3.290, val_loss=3.300]
+Epoch 25:  31%|███       | 4/13 [00:01<00:03,  2.40it/s, loss=3.37, v_num=0, train_loss=3.290, val_loss=3.300]
+Epoch 25:  31%|███       | 4/13 [00:01<00:04,  2.12it/s, loss=3.37, v_num=0, train_loss=3.340, val_loss=3.300]
+Epoch 25:  38%|███▊      | 5/13 [00:02<00:03,  2.48it/s, loss=3.37, v_num=0, train_loss=3.340, val_loss=3.300]
+Epoch 25:  38%|███▊      | 5/13 [00:02<00:03,  2.24it/s, loss=3.36, v_num=0, train_loss=3.390, val_loss=3.300]
+Epoch 25:  46%|████▌     | 6/13 [00:02<00:02,  2.53it/s, loss=3.36, v_num=0, train_loss=3.390, val_loss=3.300]
+Epoch 25:  46%|████▌     | 6/13 [00:02<00:03,  2.32it/s, loss=3.38, v_num=0, train_loss=3.560, val_loss=3.300]
+Epoch 25:  54%|█████▍    | 7/13 [00:02<00:02,  2.57it/s, loss=3.38, v_num=0, train_loss=3.560, val_loss=3.300]
+Epoch 25:  54%|█████▍    | 7/13 [00:02<00:02,  2.39it/s, loss=3.36, v_num=0, train_loss=3.280, val_loss=3.300]
+Epoch 25:  62%|██████▏   | 8/13 [00:03<00:01,  2.61it/s, loss=3.36, v_num=0, train_loss=3.280, val_loss=3.300]
+Epoch 25:  62%|██████▏   | 8/13 [00:03<00:02,  2.43it/s, loss=3.38, v_num=0, train_loss=3.610, val_loss=3.300]
+Epoch 25:  69%|██████▉   | 9/13 [00:03<00:01,  2.63it/s, loss=3.38, v_num=0, train_loss=3.610, val_loss=3.300]
+Epoch 25:  69%|██████▉   | 9/13 [00:03<00:01,  2.48it/s, loss=3.38, v_num=0, train_loss=3.540, val_loss=3.300]
+Epoch 25:  77%|███████▋  | 10/13 [00:03<00:01,  2.65it/s, loss=3.38, v_num=0, train_loss=3.540, val_loss=3.300]
+Epoch 25:  77%|███████▋  | 10/13 [00:03<00:01,  2.51it/s, loss=3.39, v_num=0, train_loss=3.470, val_loss=3.300]
+Epoch 25:  85%|████████▍ | 11/13 [00:04<00:00,  2.69it/s, loss=3.39, v_num=0, train_loss=3.470, val_loss=3.300]
+Epoch 25:  85%|████████▍ | 11/13 [00:04<00:00,  2.61it/s, loss=3.38, v_num=0, train_loss=3.370, val_loss=3.300]
+
+Validation: 0it [00:00, ?it/s][A
+
+Validation:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:  50%|█████     | 1/2 [00:00<00:00,  9.79it/s][A
+Epoch 25:  92%|█████████▏| 12/13 [00:04<00:00,  2.56it/s, loss=3.38, v_num=0, train_loss=3.370, val_loss=3.300]
+
+Validation DataLoader 0: 100%|██████████| 2/2 [00:00<00:00, 10.41it/s][A
+Epoch 25: 100%|██████████| 13/13 [00:04<00:00,  2.72it/s, loss=3.38, v_num=0, train_loss=3.370, val_loss=3.300][rank: 0] Metric val_loss improved by 0.023 >= min_delta = 0.0. New best score: 3.280
+[rank: 2] Metric val_loss improved by 0.016 >= min_delta = 0.0. New best score: 3.320
+[rank: 7] Metric val_loss improved by 0.033 >= min_delta = 0.0. New best score: 3.274
+
+Epoch 25: 100%|██████████| 13/13 [00:04<00:00,  2.64it/s, loss=3.38, v_num=0, train_loss=3.370, val_loss=3.280]
+
+                                                                      [A
+Epoch 25: 100%|██████████| 13/13 [00:05<00:00,  2.47it/s, loss=3.38, v_num=0, train_loss=3.370, val_loss=3.280]
+Epoch 25:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.38, v_num=0, train_loss=3.370, val_loss=3.280]         
+Epoch 26:   0%|          | 0/11 [00:00<?, ?it/s, loss=3.38, v_num=0, train_loss=3.370, val_loss=3.280]
+Epoch 26:   9%|▉         | 1/11 [00:00<00:05,  1.90it/s, loss=3.38, v_num=0, train_loss=3.370, val_loss=3.280]
+Epoch 26:   9%|▉         | 1/11 [00:00<00:07,  1.35it/s, loss=3.39, v_num=0, train_loss=3.230, val_loss=3.280]
+Epoch 26:  18%|█▊        | 2/11 [00:00<00:03,  2.28it/s, loss=3.39, v_num=0, train_loss=3.230, val_loss=3.280]
+Epoch 26:  18%|█▊        | 2/11 [00:01<00:04,  1.84it/s, loss=3.38, v_num=0, train_loss=3.440, val_loss=3.280]
+Epoch 26:  27%|██▋       | 3/11 [00:01<00:03,  2.46it/s, loss=3.38, v_num=0, train_loss=3.440, val_loss=3.280]
+Epoch 26:  27%|██▋       | 3/11 [00:01<00:03,  2.09it/s, loss=3.37, v_num=0, train_loss=3.270, val_loss=3.280]
+Epoch 26:  36%|███▋      | 4/11 [00:01<00:02,  2.55it/s, loss=3.37, v_num=0, train_loss=3.270, val_loss=3.280]
+Epoch 26:  36%|███▋      | 4/11 [00:01<00:03,  2.24it/s, loss=3.36, v_num=0, train_loss=3.170, val_loss=3.280]
+Epoch 26:  45%|████▌     | 5/11 [00:01<00:02,  2.61it/s, loss=3.36, v_num=0, train_loss=3.170, val_loss=3.280]
+Epoch 26:  45%|████▌     | 5/11 [00:02<00:02,  2.35it/s, loss=3.35, v_num=0, train_loss=3.260, val_loss=3.280]
+Epoch 26:  55%|█████▍    | 6/11 [00:02<00:01,  2.65it/s, loss=3.35, v_num=0, train_loss=3.260, val_loss=3.280]
+Epoch 26:  55%|█████▍    | 6/11 [00:02<00:02,  2.41it/s, loss=3.35, v_num=0, train_loss=3.350, val_loss=3.280]
+Epoch 26:  64%|██████▎   | 7/11 [00:02<00:01,  2.67it/s, loss=3.35, v_num=0, train_loss=3.350, val_loss=3.280]
+Epoch 26:  64%|██████▎   | 7/11 [00:02<00:01,  2.47it/s, loss=3.36, v_num=0, train_loss=3.290, val_loss=3.280]
+Epoch 26:  73%|███████▎  | 8/11 [00:02<00:01,  2.69it/s, loss=3.36, v_num=0, train_loss=3.290, val_loss=3.280]
+Epoch 26:  73%|███████▎  | 8/11 [00:03<00:01,  2.51it/s, loss=3.38, v_num=0, train_loss=3.530, val_loss=3.280]
+Epoch 26:  82%|████████▏ | 9/11 [00:03<00:00,  2.71it/s, loss=3.38, v_num=0, train_loss=3.530, val_loss=3.280]
+Epoch 26:  82%|████████▏ | 9/11 [00:03<00:00,  2.55it/s, loss=3.36, v_num=0, train_loss=3.350, val_loss=3.280]
+Epoch 26:  91%|█████████ | 10/11 [00:03<00:00,  2.72it/s, loss=3.36, v_num=0, train_loss=3.350, val_loss=3.280]
+Epoch 26:  91%|█████████ | 10/11 [00:03<00:00,  2.57it/s, loss=3.37, v_num=0, train_loss=3.360, val_loss=3.280]
+Epoch 26: 100%|██████████| 11/11 [00:03<00:00,  2.76it/s, loss=3.37, v_num=0, train_loss=3.360, val_loss=3.280]
+Epoch 26: 100%|██████████| 11/11 [00:04<00:00,  2.67it/s, loss=3.37, v_num=0, train_loss=3.280, val_loss=3.280]
+Epoch 26: 100%|██████████| 11/11 [00:04<00:00,  2.67it/s, loss=3.37, v_num=0, train_loss=3.280, val_loss=3.280]
+Epoch 26:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.37, v_num=0, train_loss=3.280, val_loss=3.280]         
+Epoch 27:   0%|          | 0/13 [00:00<?, ?it/s, loss=3.37, v_num=0, train_loss=3.280, val_loss=3.280]
+Epoch 27:   8%|▊         | 1/13 [00:00<00:06,  1.88it/s, loss=3.37, v_num=0, train_loss=3.280, val_loss=3.280]
+Epoch 27:   8%|▊         | 1/13 [00:00<00:09,  1.33it/s, loss=3.37, v_num=0, train_loss=3.280, val_loss=3.280]
+Epoch 27:  15%|█▌        | 2/13 [00:00<00:04,  2.26it/s, loss=3.37, v_num=0, train_loss=3.280, val_loss=3.280]
+Epoch 27:  15%|█▌        | 2/13 [00:01<00:06,  1.76it/s, loss=3.37, v_num=0, train_loss=3.390, val_loss=3.280]
+Epoch 27:  23%|██▎       | 3/13 [00:01<00:04,  2.37it/s, loss=3.37, v_num=0, train_loss=3.390, val_loss=3.280]
+Epoch 27:  23%|██▎       | 3/13 [00:01<00:04,  2.02it/s, loss=3.37, v_num=0, train_loss=3.360, val_loss=3.280]
+Epoch 27:  31%|███       | 4/13 [00:01<00:03,  2.47it/s, loss=3.37, v_num=0, train_loss=3.360, val_loss=3.280]
+Epoch 27:  31%|███       | 4/13 [00:01<00:04,  2.18it/s, loss=3.36, v_num=0, train_loss=3.360, val_loss=3.280]
+Epoch 27:  38%|███▊      | 5/13 [00:01<00:03,  2.54it/s, loss=3.36, v_num=0, train_loss=3.360, val_loss=3.280]
+Epoch 27:  38%|███▊      | 5/13 [00:02<00:03,  2.29it/s, loss=3.36, v_num=0, train_loss=3.210, val_loss=3.280]
+Epoch 27:  46%|████▌     | 6/13 [00:02<00:02,  2.59it/s, loss=3.36, v_num=0, train_loss=3.210, val_loss=3.280]
+Epoch 27:  46%|████▌     | 6/13 [00:02<00:02,  2.36it/s, loss=3.34, v_num=0, train_loss=3.220, val_loss=3.280]
+Epoch 27:  54%|█████▍    | 7/13 [00:02<00:02,  2.63it/s, loss=3.34, v_num=0, train_loss=3.220, val_loss=3.280]
+Epoch 27:  54%|█████▍    | 7/13 [00:02<00:02,  2.43it/s, loss=3.32, v_num=0, train_loss=3.180, val_loss=3.280]
+Epoch 27:  62%|██████▏   | 8/13 [00:03<00:01,  2.65it/s, loss=3.32, v_num=0, train_loss=3.180, val_loss=3.280]
+Epoch 27:  62%|██████▏   | 8/13 [00:03<00:02,  2.47it/s, loss=3.32, v_num=0, train_loss=3.400, val_loss=3.280]
+Epoch 27:  69%|██████▉   | 9/13 [00:03<00:01,  2.68it/s, loss=3.32, v_num=0, train_loss=3.400, val_loss=3.280]
+Epoch 27:  69%|██████▉   | 9/13 [00:03<00:01,  2.51it/s, loss=3.32, v_num=0, train_loss=3.490, val_loss=3.280]
+Epoch 27:  77%|███████▋  | 10/13 [00:03<00:01,  2.69it/s, loss=3.32, v_num=0, train_loss=3.490, val_loss=3.280]
+Epoch 27:  77%|███████▋  | 10/13 [00:03<00:01,  2.54it/s, loss=3.33, v_num=0, train_loss=3.360, val_loss=3.280]
+Epoch 27:  85%|████████▍ | 11/13 [00:04<00:00,  2.73it/s, loss=3.33, v_num=0, train_loss=3.360, val_loss=3.280]
+Epoch 27:  85%|████████▍ | 11/13 [00:04<00:00,  2.64it/s, loss=3.32, v_num=0, train_loss=3.310, val_loss=3.280]
+
+Validation: 0it [00:00, ?it/s][A
+
+Validation:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:   0%|          | 0/2 [00:00<?, ?it/s][A
+
+Validation DataLoader 0:  50%|█████     | 1/2 [00:00<00:00,  9.78it/s][A
+Epoch 27:  92%|█████████▏| 12/13 [00:04<00:00,  2.58it/s, loss=3.32, v_num=0, train_loss=3.310, val_loss=3.280]
+
+Validation DataLoader 0: 100%|██████████| 2/2 [00:00<00:00, 10.38it/s][A
+Epoch 27: 100%|██████████| 13/13 [00:04<00:00,  2.74it/s, loss=3.32, v_num=0, train_loss=3.310, val_loss=3.280][rank: 1] Monitored metric val_loss did not improve in the last 10 records. Best score: 3.356. Signaling Trainer to stop.
+[rank: 6] Metric val_loss improved by 0.026 >= min_delta = 0.0. New best score: 3.286
+[rank: 5] Metric val_loss improved by 0.017 >= min_delta = 0.0. New best score: 3.081
+
+Epoch 27: 100%|██████████| 13/13 [00:04<00:00,  2.68it/s, loss=3.32, v_num=0, train_loss=3.310, val_loss=3.290]
+
+                                                                      [A
+Epoch 27: 100%|██████████| 13/13 [00:05<00:00,  2.49it/s, loss=3.32, v_num=0, train_loss=3.310, val_loss=3.290]
+Epoch 27: 100%|██████████| 13/13 [00:05<00:00,  2.49it/s, loss=3.32, v_num=0, train_loss=3.310, val_loss=3.290]
+[INFO] Training done in 3.7 min
+[INFO] Best val_loss: 3.3689
+[INFO] Best ckpt: /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220221/checkpoints/cond_sedd-epoch=0007-val_loss=3.3689.ckpt
+
+[INFO] Running generation evaluation...
+[rank6]: Traceback (most recent call last):
+[rank6]:   File "/data/joshi/MESHGPT/trash/conditional_sedd/train.py", line 262, in <module>
+[rank6]:     main()
+[rank6]:     ~~~~^^
+[rank6]:   File "/data/joshi/MESHGPT/trash/conditional_sedd/train.py", line 226, in main
+[rank6]:     best_model = ConditionalSEDD.load_from_checkpoint(ckpt_callback.best_model_path)
+[rank6]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/pytorch_lightning/core/saving.py", line 139, in load_from_checkpoint
+[rank6]:     return _load_from_checkpoint(  # type: ignore[return-value]
+[rank6]:         cls,
+[rank6]:     ...<4 lines>...
+[rank6]:         **kwargs,
+[rank6]:     )
+[rank6]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/pytorch_lightning/core/saving.py", line 160, in _load_from_checkpoint
+[rank6]:     checkpoint = pl_load(checkpoint_path, map_location=map_location)
+[rank6]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/lightning_fabric/utilities/cloud_io.py", line 50, in _load
+[rank6]:     with fs.open(path_or_url, "rb") as f:
+[rank6]:          ~~~~~~~^^^^^^^^^^^^^^^^^^^
+[rank6]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/spec.py", line 1349, in open
+[rank6]:     f = self._open(
+[rank6]:         path,
+[rank6]:     ...<4 lines>...
+[rank6]:         **kwargs,
+[rank6]:     )
+[rank6]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/implementations/local.py", line 210, in _open
+[rank6]:     return LocalFileOpener(path, mode, fs=self, **kwargs)
+[rank6]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/implementations/local.py", line 387, in __init__
+[rank6]:     self._open()
+[rank6]:     ~~~~~~~~~~^^
+[rank6]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/implementations/local.py", line 392, in _open
+[rank6]:     self.f = open(self.path, mode=self.mode)
+[rank6]:              ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank6]: FileNotFoundError: [Errno 2] No such file or directory: '/data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220221/checkpoints/cond_sedd-epoch=0007-val_loss=3.3689.ckpt'
+
+[INFO] Training done in 3.7 min
+[INFO] Best val_loss: 3.3485
+[INFO] Best ckpt: /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220221/checkpoints/cond_sedd-epoch=0005-val_loss=3.3485.ckpt
+
+[INFO] Running generation evaluation...
+[rank2]: Traceback (most recent call last):
+[rank2]:   File "/data/joshi/MESHGPT/trash/conditional_sedd/train.py", line 262, in <module>
+[rank2]:     main()
+[rank2]:     ~~~~^^
+[rank2]:   File "/data/joshi/MESHGPT/trash/conditional_sedd/train.py", line 226, in main
+[rank2]:     best_model = ConditionalSEDD.load_from_checkpoint(ckpt_callback.best_model_path)
+[rank2]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/pytorch_lightning/core/saving.py", line 139, in load_from_checkpoint
+[rank2]:     return _load_from_checkpoint(  # type: ignore[return-value]
+[rank2]:         cls,
+[rank2]:     ...<4 lines>...
+[rank2]:         **kwargs,
+[rank2]:     )
+[rank2]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/pytorch_lightning/core/saving.py", line 160, in _load_from_checkpoint
+[rank2]:     checkpoint = pl_load(checkpoint_path, map_location=map_location)
+[rank2]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/lightning_fabric/utilities/cloud_io.py", line 50, in _load
+[rank2]:     with fs.open(path_or_url, "rb") as f:
+[rank2]:          ~~~~~~~^^^^^^^^^^^^^^^^^^^
+[rank2]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/spec.py", line 1349, in open
+[rank2]:     f = self._open(
+[rank2]:         path,
+[rank2]:     ...<4 lines>...
+[rank2]:         **kwargs,
+[rank2]:     )
+[rank2]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/implementations/local.py", line 210, in _open
+[rank2]:     return LocalFileOpener(path, mode, fs=self, **kwargs)
+[rank2]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/implementations/local.py", line 387, in __init__
+[rank2]:     self._open()
+[rank2]:     ~~~~~~~~~~^^
+[rank2]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/implementations/local.py", line 392, in _open
+[rank2]:     self.f = open(self.path, mode=self.mode)
+[rank2]:              ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank2]: FileNotFoundError: [Errno 2] No such file or directory: '/data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220221/checkpoints/cond_sedd-epoch=0005-val_loss=3.3485.ckpt'
+
+[INFO] Training done in 3.7 min
+[INFO] Best val_loss: 3.3753
+[INFO] Best ckpt: /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220221/checkpoints/cond_sedd-epoch=0009-val_loss=3.3753.ckpt
+
+[INFO] Running generation evaluation...
+[rank3]: Traceback (most recent call last):
+[rank3]:   File "/data/joshi/MESHGPT/trash/conditional_sedd/train.py", line 262, in <module>
+[rank3]:     main()
+[rank3]:     ~~~~^^
+[rank3]:   File "/data/joshi/MESHGPT/trash/conditional_sedd/train.py", line 226, in main
+[rank3]:     best_model = ConditionalSEDD.load_from_checkpoint(ckpt_callback.best_model_path)
+[rank3]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/pytorch_lightning/core/saving.py", line 139, in load_from_checkpoint
+[rank3]:     return _load_from_checkpoint(  # type: ignore[return-value]
+[rank3]:         cls,
+[rank3]:     ...<4 lines>...
+[rank3]:         **kwargs,
+[rank3]:     )
+[rank3]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/pytorch_lightning/core/saving.py", line 160, in _load_from_checkpoint
+[rank3]:     checkpoint = pl_load(checkpoint_path, map_location=map_location)
+[rank3]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/lightning_fabric/utilities/cloud_io.py", line 50, in _load
+[rank3]:     with fs.open(path_or_url, "rb") as f:
+[rank3]:          ~~~~~~~^^^^^^^^^^^^^^^^^^^
+[rank3]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/spec.py", line 1349, in open
+[rank3]:     f = self._open(
+[rank3]:         path,
+[rank3]:     ...<4 lines>...
+[rank3]:         **kwargs,
+[rank3]:     )
+[rank3]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/implementations/local.py", line 210, in _open
+[rank3]:     return LocalFileOpener(path, mode, fs=self, **kwargs)
+[rank3]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/implementations/local.py", line 387, in __init__
+[rank3]:     self._open()
+[rank3]:     ~~~~~~~~~~^^
+[rank3]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/implementations/local.py", line 392, in _open
+[rank3]:     self.f = open(self.path, mode=self.mode)
+[rank3]:              ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]: FileNotFoundError: [Errno 2] No such file or directory: '/data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220221/checkpoints/cond_sedd-epoch=0009-val_loss=3.3753.ckpt'
+
+[INFO] Training done in 3.7 min
+[INFO] Best val_loss: 3.3683
+[INFO] Best ckpt: /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220221/checkpoints/cond_sedd-epoch=0009-val_loss=3.3683.ckpt
+
+[INFO] Running generation evaluation...
+
+[INFO] Training done in 3.7 min
+[INFO] Best val_loss: 3.3964
+[INFO] Best ckpt: /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220221/checkpoints/cond_sedd-epoch=0005-val_loss=3.3964.ckpt
+
+[INFO] Running generation evaluation...
+[rank4]: Traceback (most recent call last):
+[rank4]:   File "/data/joshi/MESHGPT/trash/conditional_sedd/train.py", line 262, in <module>
+[rank4]:     main()
+[rank4]:     ~~~~^^
+[rank4]:   File "/data/joshi/MESHGPT/trash/conditional_sedd/train.py", line 226, in main
+[rank4]:     best_model = ConditionalSEDD.load_from_checkpoint(ckpt_callback.best_model_path)
+[rank4]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/pytorch_lightning/core/saving.py", line 139, in load_from_checkpoint
+[rank4]:     return _load_from_checkpoint(  # type: ignore[return-value]
+[rank4]:         cls,
+[rank4]:     ...<4 lines>...
+[rank4]:         **kwargs,
+[rank4]:     )
+[rank4]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/pytorch_lightning/core/saving.py", line 160, in _load_from_checkpoint
+[rank4]:     checkpoint = pl_load(checkpoint_path, map_location=map_location)
+[rank4]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/lightning_fabric/utilities/cloud_io.py", line 50, in _load
+[rank4]:     with fs.open(path_or_url, "rb") as f:
+[rank4]:          ~~~~~~~^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/spec.py", line 1349, in open
+[rank4]:     f = self._open(
+[rank4]:         path,
+[rank4]:     ...<4 lines>...
+[rank4]:         **kwargs,
+[rank4]:     )
+[rank4]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/implementations/local.py", line 210, in _open
+[rank4]:     return LocalFileOpener(path, mode, fs=self, **kwargs)
+[rank4]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/implementations/local.py", line 387, in __init__
+[rank4]:     self._open()
+[rank4]:     ~~~~~~~~~~^^
+[rank4]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/implementations/local.py", line 392, in _open
+[rank4]:     self.f = open(self.path, mode=self.mode)
+[rank4]:              ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]: FileNotFoundError: [Errno 2] No such file or directory: '/data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220221/checkpoints/cond_sedd-epoch=0005-val_loss=3.3964.ckpt'
+[rank7]: Traceback (most recent call last):
+[rank7]:   File "/data/joshi/MESHGPT/trash/conditional_sedd/train.py", line 262, in <module>
+[rank7]:     main()
+[rank7]:     ~~~~^^
+[rank7]:   File "/data/joshi/MESHGPT/trash/conditional_sedd/train.py", line 226, in main
+[rank7]:     best_model = ConditionalSEDD.load_from_checkpoint(ckpt_callback.best_model_path)
+[rank7]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/pytorch_lightning/core/saving.py", line 139, in load_from_checkpoint
+[rank7]:     return _load_from_checkpoint(  # type: ignore[return-value]
+[rank7]:         cls,
+[rank7]:     ...<4 lines>...
+[rank7]:         **kwargs,
+[rank7]:     )
+[rank7]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/pytorch_lightning/core/saving.py", line 160, in _load_from_checkpoint
+[rank7]:     checkpoint = pl_load(checkpoint_path, map_location=map_location)
+[rank7]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/lightning_fabric/utilities/cloud_io.py", line 50, in _load
+[rank7]:     with fs.open(path_or_url, "rb") as f:
+[rank7]:          ~~~~~~~^^^^^^^^^^^^^^^^^^^
+[rank7]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/spec.py", line 1349, in open
+[rank7]:     f = self._open(
+[rank7]:         path,
+[rank7]:     ...<4 lines>...
+[rank7]:         **kwargs,
+[rank7]:     )
+[rank7]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/implementations/local.py", line 210, in _open
+[rank7]:     return LocalFileOpener(path, mode, fs=self, **kwargs)
+[rank7]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/implementations/local.py", line 387, in __init__
+[rank7]:     self._open()
+[rank7]:     ~~~~~~~~~~^^
+[rank7]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/implementations/local.py", line 392, in _open
+[rank7]:     self.f = open(self.path, mode=self.mode)
+[rank7]:              ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank7]: FileNotFoundError: [Errno 2] No such file or directory: '/data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220221/checkpoints/cond_sedd-epoch=0009-val_loss=3.3683.ckpt'
+
+[INFO] Training done in 3.7 min
+[INFO] Best val_loss: 3.3557
+[INFO] Best ckpt: /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220221/checkpoints/cond_sedd-epoch=0007-val_loss=3.3557.ckpt
+
+[INFO] Running generation evaluation...
+[rank1]: Traceback (most recent call last):
+[rank1]:   File "/data/joshi/MESHGPT/trash/conditional_sedd/train.py", line 262, in <module>
+[rank1]:     main()
+[rank1]:     ~~~~^^
+[rank1]:   File "/data/joshi/MESHGPT/trash/conditional_sedd/train.py", line 226, in main
+[rank1]:     best_model = ConditionalSEDD.load_from_checkpoint(ckpt_callback.best_model_path)
+[rank1]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/pytorch_lightning/core/saving.py", line 139, in load_from_checkpoint
+[rank1]:     return _load_from_checkpoint(  # type: ignore[return-value]
+[rank1]:         cls,
+[rank1]:     ...<4 lines>...
+[rank1]:         **kwargs,
+[rank1]:     )
+[rank1]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/pytorch_lightning/core/saving.py", line 160, in _load_from_checkpoint
+[rank1]:     checkpoint = pl_load(checkpoint_path, map_location=map_location)
+[rank1]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/lightning_fabric/utilities/cloud_io.py", line 50, in _load
+[rank1]:     with fs.open(path_or_url, "rb") as f:
+[rank1]:          ~~~~~~~^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/spec.py", line 1349, in open
+[rank1]:     f = self._open(
+[rank1]:         path,
+[rank1]:     ...<4 lines>...
+[rank1]:         **kwargs,
+[rank1]:     )
+[rank1]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/implementations/local.py", line 210, in _open
+[rank1]:     return LocalFileOpener(path, mode, fs=self, **kwargs)
+[rank1]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/implementations/local.py", line 387, in __init__
+[rank1]:     self._open()
+[rank1]:     ~~~~~~~~~~^^
+[rank1]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/implementations/local.py", line 392, in _open
+[rank1]:     self.f = open(self.path, mode=self.mode)
+[rank1]:              ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]: FileNotFoundError: [Errno 2] No such file or directory: '/data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220221/checkpoints/cond_sedd-epoch=0007-val_loss=3.3557.ckpt'
+
+[INFO] Training done in 3.7 min
+[INFO] Best val_loss: 3.1244
+[INFO] Best ckpt: /data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220221/checkpoints/cond_sedd-epoch=0007-val_loss=3.1244.ckpt
+
+[INFO] Running generation evaluation...
+[rank5]: Traceback (most recent call last):
+[rank5]:   File "/data/joshi/MESHGPT/trash/conditional_sedd/train.py", line 262, in <module>
+[rank5]:     main()
+[rank5]:     ~~~~^^
+[rank5]:   File "/data/joshi/MESHGPT/trash/conditional_sedd/train.py", line 226, in main
+[rank5]:     best_model = ConditionalSEDD.load_from_checkpoint(ckpt_callback.best_model_path)
+[rank5]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/pytorch_lightning/core/saving.py", line 139, in load_from_checkpoint
+[rank5]:     return _load_from_checkpoint(  # type: ignore[return-value]
+[rank5]:         cls,
+[rank5]:     ...<4 lines>...
+[rank5]:         **kwargs,
+[rank5]:     )
+[rank5]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/pytorch_lightning/core/saving.py", line 160, in _load_from_checkpoint
+[rank5]:     checkpoint = pl_load(checkpoint_path, map_location=map_location)
+[rank5]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/lightning_fabric/utilities/cloud_io.py", line 50, in _load
+[rank5]:     with fs.open(path_or_url, "rb") as f:
+[rank5]:          ~~~~~~~^^^^^^^^^^^^^^^^^^^
+[rank5]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/spec.py", line 1349, in open
+[rank5]:     f = self._open(
+[rank5]:         path,
+[rank5]:     ...<4 lines>...
+[rank5]:         **kwargs,
+[rank5]:     )
+[rank5]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/implementations/local.py", line 210, in _open
+[rank5]:     return LocalFileOpener(path, mode, fs=self, **kwargs)
+[rank5]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/implementations/local.py", line 387, in __init__
+[rank5]:     self._open()
+[rank5]:     ~~~~~~~~~~^^
+[rank5]:   File "/data/joshi/MESHGPT/src/meshgpt_env/lib/python3.13/site-packages/fsspec/implementations/local.py", line 392, in _open
+[rank5]:     self.f = open(self.path, mode=self.mode)
+[rank5]:              ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank5]: FileNotFoundError: [Errno 2] No such file or directory: '/data/joshi/MESHGPT/trash/conditional_sedd/runs/cond_sedd_full_20260319_220221/checkpoints/cond_sedd-epoch=0007-val_loss=3.1244.ckpt'
