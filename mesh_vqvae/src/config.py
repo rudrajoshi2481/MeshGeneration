@@ -71,8 +71,8 @@ class FingerprintConfig:
 class TrainConfig:
     # Data
     data_dir: str = "/data/joshi/modelnet40_meshes"
-    cache_dir: str = "/data/joshi/MESHGPT/new_implementation/trash/cache"
-    output_dir: str = "/data/joshi/MESHGPT/new_implementation/trash"
+    cache_dir: str = "/data/joshi/tmp/MeshGeneration/runs/cache"
+    output_dir: str = "/data/joshi/tmp/MeshGeneration/runs"
     num_workers: int = 8
     num_surface_points: int = 2048
     num_query_points: int = 2048
