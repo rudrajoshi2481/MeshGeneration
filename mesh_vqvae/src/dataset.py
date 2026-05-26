@@ -39,8 +39,8 @@ class ModelNet40Dataset(Dataset):
         self.use_augmentation = use_augmentation
         self.use_contrastive = use_contrastive
 
-        # Gather all PLY files
-        all_files = sorted(glob.glob(os.path.join(data_dir, "*.ply")))
+        # Gather all PLY files recursively (files live in class/split subdirs)
+        all_files = sorted(glob.glob(os.path.join(data_dir, "**", "*.ply"), recursive=True))
         if not all_files:
             raise FileNotFoundError(f"No .ply files found in {data_dir}")
 
