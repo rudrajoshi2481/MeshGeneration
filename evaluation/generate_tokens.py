@@ -17,15 +17,16 @@ import numpy as np
 from tqdm import tqdm
 
 # Add paths
-DIFFUSION = "/data/joshi/tmp/MeshGeneration/diffusion_model"
-MESHVQVAE = "/data/joshi/tmp/MeshGeneration/mesh_vqvae/src"
+_BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DIFFUSION = os.path.join(_BASE, "diffusion_model")
+MESHVQVAE = os.path.join(_BASE, "mesh_vqvae", "src")
 sys.path.insert(0, DIFFUSION)
 sys.path.insert(0, MESHVQVAE)
 
 from SEDD import DiscreteDiffusionTransformer
 from preprocessing import MODELNET40_CLASSES
 
-DEFAULT_OUT = "/data/joshi/tmp/MeshGeneration/runs/classifier_eval"
+DEFAULT_OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(_BASE))), "trash", "classifier_eval")
 
 
 @torch.no_grad()

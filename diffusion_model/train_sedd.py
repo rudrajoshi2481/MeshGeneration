@@ -46,14 +46,18 @@ import matplotlib.pyplot as plt
 SRC = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, SRC)
 
-SEDD_PATH = "/data/joshi/yagnas_stuff/MLopsThesis/Models/SEDD.py"
-sys.path.insert(0, os.path.dirname(SEDD_PATH))
+# SEDD is co-located in the same folder
+sys.path.insert(0, SRC)
 from SEDD import DiscreteDiffusionTransformer, DiscreteNoiseSchedule
 
 from preprocessing import MODELNET40_CLASSES
 
-DATA_DIR = "/data/joshi/MESHGPT/new_implementation/trash/sedd_data"
-OUT_BASE  = "/data/joshi/MESHGPT/new_implementation/trash/sedd_runs"
+# SRC = .../sementic_channel_project/MeshGeneration/diffusion_model
+# go up: diffusion_model → MeshGeneration → sementic_channel_project → then /trash
+_SEMENTIC = os.path.dirname(os.path.dirname(SRC))   # sementic_channel_project/
+_TRASH = os.path.join(_SEMENTIC, "trash")
+DATA_DIR = os.path.join(_TRASH, "data")
+OUT_BASE  = os.path.join(_TRASH, "sedd_runs")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Dataset: wraps pre-extracted code sequences
@@ -306,7 +310,8 @@ def save_report(run_dir: str, mode: str, cfg: dict, results: dict):
 # Main
 # ─────────────────────────────────────────────────────────────────────────────
 
-def run(mode: str, run_dir: str):
+def run(mode: str, run_dir: str, gpu_override: int = None, batch_size_override: int = None,
+        n_train_override: int = None, epochs_override: int = None):
     os.makedirs(run_dir, exist_ok=True)
     plot_dir = os.path.join(run_dir, "plots")
     ckpt_dir = os.path.join(run_dir, "checkpoints")
@@ -335,7 +340,7 @@ def run(mode: str, run_dir: str):
         n_train     = 800
         n_val       = 200
         max_epochs  = 50
-        batch_size  = 32
+        batch_size  = 4
         num_gpus    = 1
         plot_every  = 5
         num_workers = 8
@@ -348,6 +353,15 @@ def run(mode: str, run_dir: str):
         num_gpus    = 8
         plot_every  = 10
         num_workers = 8
+
+    if gpu_override is not None:
+        num_gpus = gpu_override
+    if batch_size_override is not None:
+        batch_size = batch_size_override
+    if n_train_override is not None:
+        n_train = n_train_override
+    if epochs_override is not None:
+        max_epochs = epochs_override
 
     # ── datasets ──────────────────────────────────────────────────────────
     train_ds = CodeSequenceDataset(os.path.join(DATA_DIR, "train_codes.pt"), n_train)
@@ -473,12 +487,21 @@ def run(mode: str, run_dir: str):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", choices=["small", "medium", "full"], default="small")
+    parser.add_argument("--gpus", type=int, default=None,
+                        help="Override number of GPUs (default: mode preset)")
+    parser.add_argument("--batch_size", type=int, default=None,
+                        help="Override batch size (default: mode preset)")
+    parser.add_argument("--n_train", type=int, default=None,
+                        help="Override n_train samples (-1 = all, default: mode preset)")
+    parser.add_argument("--epochs", type=int, default=None,
+                        help="Override max epochs (default: mode preset)")
     args = parser.parse_args()
 
     ts      = datetime.now().strftime("%Y%m%d_%H%M%S")
     run_dir = os.path.join(OUT_BASE, f"sedd_{args.mode}_{ts}")
 
-    results = run(args.mode, run_dir)
+    results = run(args.mode, run_dir, gpu_override=args.gpus, batch_size_override=args.batch_size,
+                   n_train_override=args.n_train, epochs_override=args.epochs)
     return results
 
 

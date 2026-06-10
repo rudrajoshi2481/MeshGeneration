@@ -21,7 +21,9 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 # Add paths
-MESHVQVAE = "/data/joshi/tmp/MeshGeneration/mesh_vqvae/src"
+_HERE = os.path.dirname(os.path.abspath(__file__))  # models/classifier/
+_BASE = os.path.dirname(os.path.dirname(_HERE))      # MeshGeneration/
+MESHVQVAE = os.path.join(_BASE, "mesh_vqvae", "src")
 sys.path.insert(0, MESHVQVAE)
 from preprocessing import MODELNET40_CLASSES
 
@@ -183,9 +185,10 @@ def main():
     model.eval().to(device)
     print("[INFO] Model loaded")
     
-    # Load tokens
+    # Load tokens (support both "tokens" and "codes" keys)
     data = torch.load(args.tokens_path, weights_only=False)
-    dataset = TokenDataset(data["tokens"], data["labels"])
+    tokens = data.get("tokens", data.get("codes"))
+    dataset = TokenDataset(tokens, data["labels"])
     loader = torch.utils.data.DataLoader(dataset, batch_size=64, shuffle=False, num_workers=4)
     
     print(f"[INFO] Evaluating on {len(dataset)} samples...")
@@ -197,8 +200,12 @@ def main():
     acc = (preds == labels).mean()
     print(f"\n[RESULTS] Overall Accuracy: {acc:.4f} ({acc*100:.2f}%)")
     
+    # Get only the classes present in the data
+    unique_labels = sorted(set(labels.tolist()))
+    present_classes = [MODELNET40_CLASSES[i] for i in unique_labels]
+    
     # Classification report
-    report = classification_report(labels, preds, target_names=MODELNET40_CLASSES, 
+    report = classification_report(labels, preds, target_names=present_classes, 
                                    output_dict=True, zero_division=0)
     
     # Save metrics

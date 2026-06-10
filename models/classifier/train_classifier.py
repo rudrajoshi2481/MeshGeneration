@@ -24,7 +24,9 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
 # Add paths
-MESHVQVAE = "/data/joshi/tmp/MeshGeneration/mesh_vqvae/src"
+_HERE = os.path.dirname(os.path.abspath(__file__))  # models/classifier/
+_BASE = os.path.dirname(os.path.dirname(_HERE))      # MeshGeneration/
+MESHVQVAE = os.path.join(_BASE, "mesh_vqvae", "src")
 sys.path.insert(0, MESHVQVAE)
 from preprocessing import MODELNET40_CLASSES
 
@@ -161,9 +163,9 @@ def main():
     print(f"  Tokens: {args.tokens_path}")
     print(f"{'='*60}\n")
     
-    # Load tokens
+    # Load tokens (support both "tokens" and "codes" keys)
     data = torch.load(args.tokens_path, weights_only=False)
-    tokens = data["tokens"]
+    tokens = data.get("tokens", data.get("codes"))
     labels = data["labels"]
     print(f"[INFO] Loaded {len(tokens)} samples, tokens shape: {tuple(tokens.shape)}")
     
