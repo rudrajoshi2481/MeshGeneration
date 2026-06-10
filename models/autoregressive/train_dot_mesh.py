@@ -1,17 +1,41 @@
 """
 train_dot_mesh.py
 -----------------
-Train a Decoder-Only Transformer (NanoGPT) on pre-extracted MeshVQVAE code sequences.
-This is the DoT counterpart to diffusion_model/train_sedd.py.
+Train DoT (Decoder-Only Transformer / NanoGPT) on pre-extracted MeshGPT code sequences.
 
-Reads: trash/data/train_codes.pt, trash/data/val_codes.pt
-       {"codes": [N, 4096] long, "labels": [N] long}
+Features:
+  - Model sizes: small / medium / full (like SEDD)
+  - Conditioning: conditional (class labels) / unconditional (no labels)
+  - Plots: training curves, code distribution, per-class histograms
 
-Outputs: trash/dot_runs/<run_id>/
+Required Data:
+  --data_dir must contain:
+    - train_codes.pt  (tokens: [N, 4096], labels: [N])
+    - val_codes.pt    (tokens: [M, 4096], labels: [M])
 
 Usage:
-  python train_dot_mesh.py --mode small    # fast sanity check
-  python train_dot_mesh.py --mode full     # full training
+  # Quick test (1 epoch, small model, conditional)
+  python train_dot_mesh.py --model_mode small --condition_mode conditional --epochs 1
+
+  # Full training (small model, conditional - RECOMMENDED)
+  python train_dot_mesh.py --model_mode small --condition_mode conditional --epochs 100
+
+  # Unconditional training (optional comparison)
+  python train_dot_mesh.py --model_mode small --condition_mode unconditional --epochs 100
+
+  # Custom data/output paths
+  python train_dot_mesh.py \
+      --data_dir /path/to/data \
+      --out_base /path/to/output \
+      --model_mode small \
+      --condition_mode conditional \
+      --epochs 100
+
+Outputs:
+  --out_base/dot_<model_mode>_<condition_mode>_YYYYMMDD_HHMMSS/
+      checkpoints/     ← Model checkpoints (best + final)
+      plots/           ← Training curves, histograms, distributions
+      report.json      ← Training summary
 """
 
 import os
@@ -137,13 +161,15 @@ class DoTPlotCallback(Callback):
     """Logs training curves and generation samples every N epochs for DoT."""
 
     def __init__(self, plot_dir: str, val_dataset, vocab_size: int,
-                 seq_len: int, plot_every: int = 5, n_gen: int = 8):
+                 seq_len: int, plot_every: int = 5, n_gen: int = 8,
+                 condition_mode: str = "conditional"):
         self.plot_dir   = plot_dir
         self.val_ds     = val_dataset
         self.vocab_size = vocab_size
         self.seq_len    = seq_len
         self.plot_every = plot_every
         self.n_gen      = n_gen
+        self.condition_mode = condition_mode  # "conditional" | "unconditional"
         os.makedirs(plot_dir, exist_ok=True)
 
         self.train_losses = []
@@ -180,26 +206,43 @@ class DoTPlotCallback(Callback):
     def _plot_generation(self, model, ep: int):
         """Generate samples and plot code histograms."""
         device = next(model.parameters()).device
-        n_cls  = min(10, NUM_CLASSES)
-        # Generate one sample per class
-        prompts = []
-        for c in range(n_cls):
-            cls_tok = torch.tensor([[BOS_TOKEN, BOS_TOKEN + c + 1]], dtype=torch.long, device=device)
-            prompts.append(cls_tok)
         
-        all_samples = []
-        for prompt in prompts:
-            gen = model.generate(prompt, max_new_tokens=self.seq_len)
-            all_samples.append(gen[0, 2:].cpu())  # Remove BOS and class token
-        
-        samples = torch.stack(all_samples)  # [n_cls, seq_len]
+        if self.condition_mode == "conditional":
+            n_cls  = min(10, NUM_CLASSES)
+            # Generate one sample per class
+            prompts = []
+            for c in range(n_cls):
+                cls_tok = torch.tensor([[BOS_TOKEN, BOS_TOKEN + c + 1]], dtype=torch.long, device=device)
+                prompts.append(cls_tok)
+            
+            all_samples = []
+            for prompt in prompts:
+                gen = model.generate(prompt, max_new_tokens=self.seq_len)
+                all_samples.append(gen[0, 2:].cpu())  # Remove BOS and class token
+            
+            samples = torch.stack(all_samples)  # [n_cls, seq_len]
+            n_plot = n_cls
+            titles = [f"Class {i}" for i in range(n_cls)]
+        else:
+            # Unconditional: generate 10 samples from BOS only
+            n_gen = 10
+            prompts = [torch.tensor([[BOS_TOKEN]], dtype=torch.long, device=device) for _ in range(n_gen)]
+            
+            all_samples = []
+            for prompt in prompts:
+                gen = model.generate(prompt, max_new_tokens=self.seq_len)
+                all_samples.append(gen[0, 1:].cpu())  # Remove BOS token
+            
+            samples = torch.stack(all_samples)  # [n_gen, seq_len]
+            n_plot = n_gen
+            titles = [f"Sample {i+1}" for i in range(n_gen)]
 
         fig, axes = plt.subplots(2, 5, figsize=(18, 7))
         axes = axes.flatten()
-        for i in range(n_cls):
+        for i in range(n_plot):
             codes = samples[i].numpy()
             axes[i].hist(codes, bins=range(self.vocab_size + 1), color="#5B8DB8", alpha=0.85, edgecolor="white")
-            axes[i].set_title(f"Class {i}", fontsize=10, fontweight='semibold')
+            axes[i].set_title(titles[i], fontsize=10, fontweight='semibold')
             axes[i].set_xlabel("Code ID", fontsize=9, labelpad=6)
             axes[i].set_ylabel("Count", fontsize=9, labelpad=6)
             axes[i].grid(True, alpha=0.3)
@@ -215,9 +258,10 @@ class DoTPlotCallback(Callback):
 
         # Real distribution from validation set
         real_codes = []
+        skip_tokens = 2 if self.condition_mode == "conditional" else 1  # BOS + class (or just BOS)
         for i in range(min(100, len(self.val_ds))):
             x, _ = self.val_ds[i]
-            real_codes.append(x[2:].numpy())  # Skip BOS and class tokens
+            real_codes.append(x[skip_tokens:].numpy())  # Skip BOS (and class token if conditional)
         real_codes = np.concatenate(real_codes)
         real_hist = np.bincount(real_codes, minlength=self.vocab_size).astype(float)
         real_hist /= real_hist.sum() + 1e-8
@@ -225,11 +269,21 @@ class DoTPlotCallback(Callback):
         # Generated distribution
         n_gen_samples = 50
         gen_codes = []
-        for c in range(NUM_CLASSES):
-            cls_tok = torch.tensor([[BOS_TOKEN, BOS_TOKEN + c + 1]], dtype=torch.long, device=device)
-            for _ in range(n_gen_samples // NUM_CLASSES):
-                gen = model.generate(cls_tok, max_new_tokens=self.seq_len)
-                gen_codes.append(gen[0, 2:].cpu().numpy())
+        
+        if self.condition_mode == "conditional":
+            # Generate from each class
+            for c in range(NUM_CLASSES):
+                cls_tok = torch.tensor([[BOS_TOKEN, BOS_TOKEN + c + 1]], dtype=torch.long, device=device)
+                for _ in range(n_gen_samples // NUM_CLASSES):
+                    gen = model.generate(cls_tok, max_new_tokens=self.seq_len)
+                    gen_codes.append(gen[0, 2:].cpu().numpy())  # Skip BOS + class
+        else:
+            # Unconditional: generate from BOS only
+            for _ in range(n_gen_samples):
+                bos_tok = torch.tensor([[BOS_TOKEN]], dtype=torch.long, device=device)
+                gen = model.generate(bos_tok, max_new_tokens=self.seq_len)
+                gen_codes.append(gen[0, 1:].cpu().numpy())  # Skip BOS only
+                
         gen_codes = np.concatenate(gen_codes)
         gen_hist = np.bincount(gen_codes, minlength=self.vocab_size).astype(float)
         gen_hist /= gen_hist.sum() + 1e-8
@@ -240,9 +294,18 @@ class DoTPlotCallback(Callback):
         ax.bar(x, gen_hist,  alpha=0.6, label="Generated", color="#F4A35A", width=1.0)
         ax.set_xlabel("Code ID", fontsize=11, labelpad=8)
         ax.set_ylabel("Frequency", fontsize=11, labelpad=8)
-        ax.set_title(f"DoT: Real vs Generated Code Distribution (epoch {ep})", fontsize=12, fontweight='bold')
+        title = f"DoT ({self.condition_mode}): Real vs Generated Code Distribution (epoch {ep})"
+        ax.set_title(title, fontsize=12, fontweight='bold')
         ax.legend(frameon=True, framealpha=0.9, edgecolor="#CCCCCC")
         ax.grid(True, alpha=0.3)
+        
+        # Compute and display overlap
+        overlap = np.sum(np.minimum(real_hist, gen_hist))
+        ax.text(0.02, 0.98, f"Distribution Overlap: {overlap:.3f}",
+               transform=ax.transAxes, fontsize=10, verticalalignment="top",
+               bbox=dict(boxstyle="round,pad=0.3", facecolor="white", 
+                        edgecolor="#333333", alpha=0.9))
+        
         plt.tight_layout()
         plt.savefig(os.path.join(self.plot_dir, f"code_dist_ep{ep:04d}.png"), dpi=150, facecolor="white")
         plt.close()
@@ -301,7 +364,8 @@ ADDITIONAL_VOCAB = 1 + NUM_CLASSES  # BOS + 40 class tokens
 class CodeSequenceDataset(Dataset):
     """Wraps pre-extracted MeshVQVAE code sequences for autoregressive training."""
 
-    def __init__(self, pt_path: str, block_size: int = SEQ_LEN, n_samples: int = -1):
+    def __init__(self, pt_path: str, block_size: int = SEQ_LEN, n_samples: int = -1,
+                 condition_mode: str = "conditional"):
         data = torch.load(pt_path, weights_only=False)
         codes  = data.get("codes", data.get("tokens")).long()   # [N, seq_len]
         labels = data["labels"].long()
@@ -311,7 +375,8 @@ class CodeSequenceDataset(Dataset):
         self.codes      = codes
         self.labels     = labels
         self.block_size = block_size
-        print(f"[Dataset] {os.path.basename(pt_path)}: {len(self.codes)} samples")
+        self.condition_mode = condition_mode  # "conditional" | "unconditional"
+        print(f"[Dataset] {os.path.basename(pt_path)}: {len(self.codes)} samples ({condition_mode})")
 
     def __len__(self):
         return len(self.codes)
@@ -319,9 +384,16 @@ class CodeSequenceDataset(Dataset):
     def __getitem__(self, idx):
         codes = self.codes[idx][:self.block_size]
         label = self.labels[idx]
-        # Prepend [BOS, class_token] so the model knows the target class
-        cls_tok = torch.tensor([BOS_TOKEN, BOS_TOKEN + label.item() + 1], dtype=torch.long)
-        seq = torch.cat([cls_tok, codes])          # [2 + block_size]
+        
+        if self.condition_mode == "conditional":
+            # Prepend [BOS, class_token] so the model knows the target class
+            cls_tok = torch.tensor([BOS_TOKEN, BOS_TOKEN + label.item() + 1], dtype=torch.long)
+            seq = torch.cat([cls_tok, codes])          # [2 + block_size]
+        else:
+            # Unconditional: just prepend BOS token
+            bos_tok = torch.tensor([BOS_TOKEN], dtype=torch.long)
+            seq = torch.cat([bos_tok, codes])          # [1 + block_size]
+        
         x   = seq[:-1]                             # input
         y   = seq[1:]                              # target (shifted right)
         return x, y
@@ -331,8 +403,16 @@ class CodeSequenceDataset(Dataset):
 # Config presets
 # ─────────────────────────────────────────────────────────────────────────────
 
-SMALL_CFG = dict(n_embd=128, n_head=4, n_layer=3, learning_rate=5e-4, epochs=5,  batch_size=8,  n_samples=200)
-FULL_CFG  = dict(n_embd=512, n_head=8, n_layer=6, learning_rate=1e-4, epochs=30, batch_size=16, n_samples=-1)
+# Model configurations: small/medium/full (like SEDD)
+SMALL_CFG  = dict(n_embd=128, n_head=4, n_layer=3, learning_rate=5e-4, epochs=100, batch_size=16, n_samples=-1)   # ~4GB VRAM
+MEDIUM_CFG = dict(n_embd=256, n_head=8, n_layer=4, learning_rate=3e-4, epochs=100, batch_size=12, n_samples=-1)   # ~8GB VRAM
+FULL_CFG   = dict(n_embd=512, n_head=8, n_layer=6, learning_rate=1e-4, epochs=200, batch_size=8,  n_samples=-1)   # ~20GB VRAM
+
+CONFIGS = {
+    "small": SMALL_CFG,
+    "medium": MEDIUM_CFG,
+    "full": FULL_CFG,
+}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -340,44 +420,82 @@ FULL_CFG  = dict(n_embd=512, n_head=8, n_layer=6, learning_rate=1e-4, epochs=30,
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=["small", "full"], default="small")
-    parser.add_argument("--data_dir", type=str, default=DATA_DIR)
-    parser.add_argument("--out_base", type=str, default=OUT_BASE)
-    parser.add_argument("--gpus", type=int, default=1)
-    parser.add_argument("--n_train", type=int, default=None, help="Override n_train (-1=all)")
+    parser = argparse.ArgumentParser(
+        description="Train DoT (Decoder-only Transformer / NanoGPT) on MeshGPT code sequences",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Quick test (1 epoch, small model, conditional)
+  python train_dot_mesh.py --model_mode small --condition_mode conditional --epochs 1
+
+  # Full training (small model, conditional - RECOMMENDED)
+  python train_dot_mesh.py --model_mode small --condition_mode conditional --epochs 100
+
+  # Unconditional training (optional comparison)
+  python train_dot_mesh.py --model_mode small --condition_mode unconditional --epochs 100
+
+  # Medium model
+  python train_dot_mesh.py --model_mode medium --condition_mode conditional --epochs 100
+
+  # Custom data/output paths
+  python train_dot_mesh.py \\
+      --data_dir /path/to/data \\
+      --out_base /path/to/output \\
+      --model_mode small \\
+      --condition_mode conditional \\
+      --epochs 100
+        """
+    )
+    parser.add_argument("--model_mode", choices=["small", "medium", "full"], default="small",
+                       help="Model size: small=128d (~4GB), medium=256d (~8GB), full=512d (~20GB)")
+    parser.add_argument("--condition_mode", choices=["conditional", "unconditional"], default="conditional",
+                       help="conditional=use class labels | unconditional=generate without class labels")
+    parser.add_argument("--data_dir", type=str, default=DATA_DIR,
+                       help=f"Path to train_codes.pt and val_codes.pt (default: {DATA_DIR})")
+    parser.add_argument("--out_base", type=str, default=OUT_BASE,
+                       help=f"Output directory base (default: {OUT_BASE})")
+    parser.add_argument("--gpus", type=int, default=1, help="Number of GPUs (default: 1)")
+    parser.add_argument("--n_train", type=int, default=None, help="Override n_train samples (-1=all)")
     parser.add_argument("--epochs", type=int, default=None, help="Override max epochs")
-    parser.add_argument("--batch_size", type=int, default=None, help="Override batch size")
+    parser.add_argument("--batch_size", type=int, default=None, help="Override batch size per GPU")
+    parser.add_argument("--plot_every", type=int, default=None, help="Plot frequency (epochs)")
     args = parser.parse_args()
 
-    cfg = dict(SMALL_CFG if args.mode == "small" else FULL_CFG)  # copy to allow overrides
+    cfg = dict(CONFIGS[args.model_mode])  # copy to allow overrides
     if args.n_train is not None:
         cfg["n_samples"] = args.n_train
     if args.epochs is not None:
         cfg["epochs"] = args.epochs
     if args.batch_size is not None:
         cfg["batch_size"] = args.batch_size
-    run_id = datetime.now().strftime("dot_run_%Y%m%d_%H%M%S")
+    
+    # Create descriptive run directory
+    run_id = datetime.now().strftime(f"dot_{args.model_mode}_{args.condition_mode}_%Y%m%d_%H%M%S")
     out_dir = os.path.join(args.out_base, run_id)
     plot_dir = os.path.join(out_dir, "plots")
     os.makedirs(out_dir, exist_ok=True)
     os.makedirs(plot_dir, exist_ok=True)
 
-    # Plot frequency based on mode
-    plot_every = 5 if args.mode == "small" else 10
+    # Plot frequency based on mode (or use override)
+    plot_every = args.plot_every if args.plot_every is not None else (5 if args.model_mode == "small" else 10)
 
     print(f"\n{'='*60}")
-    print(f"  DoT Training — {args.mode.upper()} mode")
+    print(f"  DoT Training — {args.model_mode.upper()} model, {args.condition_mode.upper()}")
+    print(f"  Epochs: {cfg['epochs']}, Batch: {cfg['batch_size']}")
     print(f"  Output → {out_dir}")
     print(f"  Plots  → {plot_dir} (every {plot_every} epochs)")
     print(f"{'='*60}\n")
 
     # ── Datasets ────────────────────────────────────────────────────────────
     train_ds = CodeSequenceDataset(
-        os.path.join(args.data_dir, "train_codes.pt"), n_samples=cfg["n_samples"]
+        os.path.join(args.data_dir, "train_codes.pt"), 
+        n_samples=cfg["n_samples"],
+        condition_mode=args.condition_mode
     )
     val_ds = CodeSequenceDataset(
-        os.path.join(args.data_dir, "val_codes.pt"), n_samples=cfg["n_samples"] // 5 if cfg["n_samples"] > 0 else -1
+        os.path.join(args.data_dir, "val_codes.pt"), 
+        n_samples=cfg["n_samples"] // 5 if cfg["n_samples"] > 0 else -1,
+        condition_mode=args.condition_mode
     )
 
     train_loader = DataLoader(train_ds, batch_size=cfg["batch_size"], shuffle=True,
@@ -404,6 +522,7 @@ def main():
         vocab_size=VOCAB_SIZE,
         seq_len=SEQ_LEN,
         plot_every=plot_every,
+        condition_mode=args.condition_mode,
     )
     ckpt_cb = ModelCheckpoint(
         dirpath=os.path.join(out_dir, "checkpoints"),
@@ -432,10 +551,13 @@ def main():
         final_path = os.path.join(out_dir, "dot_final.pt")
         torch.save(model.state_dict(), final_path)
         report = {
-            "mode": args.mode,
+            "model_mode": args.model_mode,
+            "condition_mode": args.condition_mode,
             "best_ckpt": ckpt_cb.best_model_path,
             "final_model": final_path,
             "config": cfg,
+            "data_dir": args.data_dir,
+            "out_base": args.out_base,
         }
         with open(os.path.join(out_dir, "report.json"), "w") as f:
             json.dump(report, f, indent=2)
