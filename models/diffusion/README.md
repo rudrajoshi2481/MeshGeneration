@@ -89,8 +89,10 @@ models/diffusion/
 ### Step 1: Extract MeshGPT Codes
 First, train MeshGPT and extract discrete codes:
 ```bash
-cd ../mesh_vqvae/src
-python extract_fresh_codes.py --ckpt <path/to/checkpoint> --out_dir ../../trash/data
+# From models/diffusion/ directory (where this README is)
+python extract_fresh_codes.py \
+    --ckpt <path/to/vqvae_checkpoint.ckpt> \
+    --out_dir ../../trash/data
 ```
 
 This generates:

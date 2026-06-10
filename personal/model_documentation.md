@@ -38,8 +38,8 @@ Decoder: 4096 tokens → Occupancy prediction → 3D mesh
 # Training (done)
 python train_vqvae.py --mode small
 
-# Code extraction
-python extract_fresh_codes.py --ckpt <checkpoint>
+# Code extraction (from models/diffusion/)
+python extract_fresh_codes.py --ckpt <checkpoint> --out_dir ../../trash/data
 ```
 
 ---
@@ -342,14 +342,14 @@ python run_all.py
 ### Train Individual Models
 ```bash
 # 1. Extract codes (if needed)
-python diffusion_model/extract_fresh_codes.py
+python models/diffusion/extract_fresh_codes.py --out_dir trash/data
 
 # 2. Train classifier
 python models/classifier/train_classifier.py \
     --tokens_path trash/data/train_codes.pt --mode conditional
 
 # 3. Train SEDD
-python diffusion_model/train_sedd.py --mode small --epochs 200
+python models/diffusion/train_sedd.py --mode small --epochs 200
 
 # 4. Train DoT
 python models/autoregressive/train_dot_mesh.py --mode small --epochs 100

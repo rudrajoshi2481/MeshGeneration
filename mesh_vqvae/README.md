@@ -11,7 +11,7 @@ python train_without_classifier.py --quick        # 1 epoch test
 python train_without_classifier.py --gpus 1     # Full training
 
 # Extract codes for downstream models
-cd ../src
+cd ../models/diffusion
 python extract_fresh_codes.py \
     --ckpt <path/to/checkpoint> \
     --out_dir ../../trash/data
