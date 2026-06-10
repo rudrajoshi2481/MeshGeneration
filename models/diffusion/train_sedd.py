@@ -55,9 +55,9 @@ _BASE = os.path.dirname(os.path.dirname(SRC))
 sys.path.insert(0, os.path.join(_BASE, "mesh_vqvae", "src"))
 from preprocessing import MODELNET40_CLASSES
 
-# SRC = .../sementic_channel_project/MeshGeneration/diffusion_model
-# go up: diffusion_model → MeshGeneration → sementic_channel_project → then /trash
-_SEMENTIC = os.path.dirname(os.path.dirname(SRC))   # sementic_channel_project/
+# SRC = .../sementic_channel_project/MeshGeneration/models/diffusion/
+# go up: models/diffusion → models → MeshGeneration → sementic_channel_project → trash/
+_SEMENTIC = os.path.dirname(os.path.dirname(os.path.dirname(SRC)))  # sementic_channel_project/
 _TRASH = os.path.join(_SEMENTIC, "trash")
 DATA_DIR = os.path.join(_TRASH, "data")
 OUT_BASE  = os.path.join(_TRASH, "sedd_runs")
