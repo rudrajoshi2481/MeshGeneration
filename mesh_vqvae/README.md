@@ -2,6 +2,50 @@
 
 3D mesh autoencoder using Vector Quantization for discrete latent representation.
 
+## Quick Run
+
+```bash
+# Train without classifier (recommended for semantic channel)
+cd training_scripts
+python train_without_classifier.py --quick        # 1 epoch test
+python train_without_classifier.py --gpus 1     # Full training
+
+# Extract codes for downstream models
+cd ../src
+python extract_fresh_codes.py \
+    --ckpt <path/to/checkpoint> \
+    --out_dir ../../trash/data
+```
+
+## Config Changes
+
+Edit `src/config.py` lines 110-140:
+
+```python
+class SmallModelConfig:
+    vq: VQConfig = field(default_factory=lambda: VQConfig(
+        num_embeddings=256,    # Codebook size
+        embedding_dim=64,      # Token dimension
+    ))
+    train: TrainConfig = field(default_factory=lambda: TrainConfig(
+        batch_size=4,          # GPU memory dependent
+        max_steps=100_000,
+        lr=1e-3
+    ))
+```
+
+## Args
+
+- `--quick` - 2 epoch smoke test (32 samples)
+- `--gpus` - Number of GPUs (default: 1)
+- `--resume` - Resume from checkpoint (`last` or path)
+
+## Output
+
+- Checkpoints: `runs/<run_name>/checkpoints/`
+- Logs: TensorBoard + CSV
+- Codes: `trash/data/train_codes.pt` + `val_codes.pt`
+
 ## Architecture
 
 - **Encoder**: PointNet-style encoder with grid-based feature aggregation (16³ voxel grid)

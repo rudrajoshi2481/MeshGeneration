@@ -133,7 +133,7 @@ class SmallModelConfig:
         codebook_dim=64, fingerprint_dim=128
     ))
     train: TrainConfig = field(default_factory=lambda: TrainConfig(
-        batch_size=16, max_steps=100_000, lr=1e-3
+        batch_size=4, max_steps=100_000, lr=1e-3
     ))
     num_classes: int = 40
     fingerprint_dim: int = 128

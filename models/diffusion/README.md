@@ -2,6 +2,45 @@
 
 Discrete diffusion model for generating MeshGPT latent code sequences.
 
+## Quick Run
+
+```bash
+# Train SEDD (small config, 1 GPU)
+python train_sedd.py --mode small --epochs 200 --gpus 1 --batch_size 16
+
+# Quick test (1 epoch)
+python train_sedd.py --mode small --epochs 1 --gpus 1 --batch_size 16
+```
+
+## Config Changes
+
+Edit `train_sedd.py` lines 25-50:
+
+```python
+SMALL_CFG = {
+    "vocab_size": 256,
+    "max_seq_len": 4096,
+    "d_model": 128,      # Model dimension
+    "nhead": 4,          # Attention heads
+    "num_layers": 3,     # Transformer layers
+    "num_classes": 40,
+    "learning_rate": 1e-4
+}
+```
+
+## Args
+
+- `--mode` - `small` (128d) / `medium` (256d) / `full` (512d)
+- `--epochs` - Training epochs (default: 200)
+- `--gpus` - Number of GPUs (default: 1)
+- `--batch_size` - Batch size (default: 16)
+- `--n_train` - Samples to use (-1 for all)
+
+## Output
+
+- Checkpoints: `trash/sedd_runs/<run_id>/checkpoints/`
+- Plots: Loss curves, generation histograms
+
 ## Overview
 
 SEDD learns to generate discrete code sequences (extracted from MeshGPT VQ-VAE) using score-matching diffusion. This enables unconditional and class-conditional 3D shape generation in the latent space.
