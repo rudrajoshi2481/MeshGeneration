@@ -18,7 +18,7 @@ from tqdm import tqdm
 
 # Add paths
 _BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DIFFUSION = os.path.join(_BASE, "diffusion_model")
+DIFFUSION = os.path.join(_BASE, "models", "diffusion")
 MESHVQVAE = os.path.join(_BASE, "mesh_vqvae", "src")
 sys.path.insert(0, DIFFUSION)
 sys.path.insert(0, MESHVQVAE)

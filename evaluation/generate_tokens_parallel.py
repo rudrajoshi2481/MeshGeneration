@@ -18,7 +18,7 @@ from tqdm import tqdm
 # Add paths
 _HERE = os.path.dirname(os.path.abspath(__file__))  # evaluation/
 _BASE = os.path.dirname(_HERE)                        # MeshGeneration/
-DIFFUSION = os.path.join(_BASE, "diffusion_model")
+DIFFUSION = os.path.join(_BASE, "models", "diffusion")
 MESHVQVAE = os.path.join(_BASE, "mesh_vqvae", "src")
 sys.path.insert(0, DIFFUSION)
 sys.path.insert(0, MESHVQVAE)

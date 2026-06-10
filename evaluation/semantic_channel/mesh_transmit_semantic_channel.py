@@ -41,7 +41,7 @@ _HERE  = os.path.dirname(os.path.abspath(__file__))                  # evaluatio
 _BASE  = os.path.dirname(os.path.dirname(_HERE))                       # MeshGeneration/
 _TRASH = os.path.join(os.path.dirname(_BASE), "trash")
 
-DIFFUSION = os.path.join(_BASE, "diffusion_model")
+DIFFUSION = os.path.join(_BASE, "models", "diffusion")
 MESHVQVAE = os.path.join(_BASE, "mesh_vqvae", "src")
 CLASSIFIER = os.path.join(_BASE, "models", "classifier")
 

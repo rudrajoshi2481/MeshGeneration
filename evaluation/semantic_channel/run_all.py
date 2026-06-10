@@ -36,7 +36,7 @@ DATA_DIR  = os.path.join(_TRASH, "data")
 # Sub-directories
 CLASSIFIER  = os.path.join(_BASE, "models", "classifier")
 AUTOREGRESSIVE = os.path.join(_BASE, "models", "autoregressive")
-DIFFUSION = os.path.join(_BASE, "diffusion_model")
+DIFFUSION = os.path.join(_BASE, "models", "diffusion")
 SEMCHAN   = _HERE  # Already in evaluation/semantic_channel/
 
 

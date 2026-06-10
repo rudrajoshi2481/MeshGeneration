@@ -8,7 +8,7 @@ import os
 # Add paths
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _BASE = os.path.dirname(_HERE)
-sys.path.insert(0, os.path.join(_BASE, 'diffusion_model'))
+sys.path.insert(0, os.path.join(_BASE, 'models', 'diffusion'))
 sys.path.insert(0, os.path.join(_BASE, 'mesh_vqvae', 'src'))
 
 import torch
