@@ -64,19 +64,48 @@ def check_data_exists(data_dir):
             log(f"Found: {path}")
     return missing
 
-def run_command(cmd, cwd=None):
-    """Run shell command and return success status."""
+def run_command(cmd, cwd=None, log_file=None):
+    """Run shell command and return success status. Capture output to log file."""
     import subprocess
     log(f"Running: {cmd}")
+    
+    # Run command and capture output
     result = subprocess.run(cmd, shell=True, cwd=cwd, capture_output=True, text=True)
+    
+    # Prepare log content
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    log_content = f"""
+{'='*80}
+Command: {cmd}
+Timestamp: {timestamp}
+Directory: {cwd or os.getcwd()}
+Return Code: {result.returncode}
+{'='*80}
+
+STDOUT:
+{result.stdout}
+
+STDERR:
+{result.stderr}
+
+{'='*80}
+"""
+    
+    # Save to log file if specified
+    if log_file:
+        os.makedirs(os.path.dirname(log_file), exist_ok=True)
+        with open(log_file, "w") as f:
+            f.write(log_content)
+        log(f"Log saved: {log_file}")
+    
     if result.returncode != 0:
-        log(f"Error: {result.stderr}", "ERROR")
-        return False
+        log(f"Error: {result.stderr[:200]}...", "ERROR")
+        return False, log_content
     log("Success")
-    return True
+    return True, log_content
 
 # ── test functions ────────────────────────────────────────────────────────────
-def test_classifier(data_dir, out_dir):
+def test_classifier(data_dir, out_dir, all_logs):
     """Test classifier training for 1 epoch."""
     log("\n" + "="*60)
     log("TEST 1: Classifier (1 epoch, 128 samples)")
@@ -84,6 +113,7 @@ def test_classifier(data_dir, out_dir):
     
     out = os.path.join(out_dir, "test_classifier")
     os.makedirs(out, exist_ok=True)
+    log_file = os.path.join(out, "training.log")
     
     cmd = f"""cd {os.path.join(_BASE, "models", "classifier")} && \
 python train_classifier.py \
@@ -94,9 +124,11 @@ python train_classifier.py \
     --batch_size {TEST_CONFIG["classifier"]["batch_size"]} \
     --gpus 1"""
     
-    return run_command(cmd)
+    success, log_content = run_command(cmd, log_file=log_file)
+    all_logs.append(("CLASSIFIER", log_content))
+    return success
 
-def test_sedd(data_dir, out_dir):
+def test_sedd(data_dir, out_dir, all_logs):
     """Test SEDD training for 1 epoch."""
     log("\n" + "="*60)
     log("TEST 2: SEDD (1 epoch, 32 samples)")
@@ -104,6 +136,7 @@ def test_sedd(data_dir, out_dir):
     
     out = os.path.join(out_dir, "test_sedd")
     os.makedirs(out, exist_ok=True)
+    log_file = os.path.join(out, "training.log")
     
     cmd = f"""cd {os.path.join(_BASE, "models", "diffusion")} && \
 python train_sedd.py \
@@ -113,9 +146,11 @@ python train_sedd.py \
     --n_train {TEST_CONFIG["sedd"]["n_train"]} \
     --gpus 1"""
     
-    return run_command(cmd)
+    success, log_content = run_command(cmd, log_file=log_file)
+    all_logs.append(("SEDD", log_content))
+    return success
 
-def test_dot(data_dir, out_dir):
+def test_dot(data_dir, out_dir, all_logs):
     """Test DoT training for 1 epoch."""
     log("\n" + "="*60)
     log("TEST 3: DoT (1 epoch, 32 samples)")
@@ -123,6 +158,7 @@ def test_dot(data_dir, out_dir):
     
     out = os.path.join(out_dir, "test_dot")
     os.makedirs(out, exist_ok=True)
+    log_file = os.path.join(out, "training.log")
     
     cmd = f"""cd {os.path.join(_BASE, "models", "autoregressive")} && \
 python train_dot_mesh.py \
@@ -132,7 +168,9 @@ python train_dot_mesh.py \
     --n_train {TEST_CONFIG["dot"]["n_train"]} \
     --gpus 1"""
     
-    return run_command(cmd)
+    success, log_content = run_command(cmd, log_file=log_file)
+    all_logs.append(("DOT", log_content))
+    return success
 
 def test_token_shapes(data_dir):
     """Verify all tokens have correct shape [N, 4096]."""
@@ -206,8 +244,8 @@ def test_puncture_refill_logic():
         log(f"Puncture test failed: {e}", "ERROR")
         return False
 
-def generate_summary(results, out_dir):
-    """Generate test summary report."""
+def generate_summary(results, out_dir, all_logs):
+    """Generate test summary report and combined log file."""
     log("\n" + "="*60)
     log("TEST SUMMARY")
     log("="*60)
@@ -221,6 +259,33 @@ def generate_summary(results, out_dir):
     
     log(f"\nTotal: {passed}/{total} tests passed")
     
+    # Show log file locations
+    log("\n" + "="*60)
+    log("LOG FILES")
+    log("="*60)
+    log("Individual model logs:")
+    log("  - test_classifier/training.log")
+    log("  - test_sedd/training.log")
+    log("  - test_dot/training.log")
+    log("")
+    log("Combined log:")
+    log("  - all_tests.log (contains all model outputs)")
+    
+    # Save combined log file
+    combined_log_path = os.path.join(out_dir, "all_tests.log")
+    with open(combined_log_path, "w") as f:
+        f.write(f"{'='*80}\n")
+        f.write("COMBINED TEST LOG\n")
+        f.write(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        f.write(f"Results: {passed}/{total} tests passed\n")
+        f.write(f"{'='*80}\n\n")
+        
+        for model_name, log_content in all_logs:
+            f.write(log_content)
+            f.write("\n\n")
+    
+    log(f"\nCombined log saved: {combined_log_path}")
+    
     # Save JSON report
     report = {
         "timestamp": datetime.now().isoformat(),
@@ -228,6 +293,12 @@ def generate_summary(results, out_dir):
         "passed": passed,
         "total": total,
         "success_rate": passed / total if total > 0 else 0,
+        "log_files": {
+            "classifier": "test_classifier/training.log",
+            "sedd": "test_sedd/training.log",
+            "dot": "test_dot/training.log",
+            "combined": "all_tests.log"
+        }
     }
     
     report_path = os.path.join(out_dir, "test_report.json")
@@ -270,6 +341,7 @@ def main():
     
     # Run tests
     results = {}
+    all_logs = []  # Collect all logs for combined file
     
     # Test 1: Token shapes
     results["token_shapes"] = test_token_shapes(data_dir)
@@ -279,27 +351,27 @@ def main():
     
     # Test 3: Classifier
     if not args.skip_classifier:
-        results["classifier"] = test_classifier(data_dir, out_dir)
+        results["classifier"] = test_classifier(data_dir, out_dir, all_logs)
     else:
         log("Skipping classifier test")
         results["classifier"] = None
     
     # Test 4: SEDD
     if not args.skip_sedd:
-        results["sedd"] = test_sedd(data_dir, out_dir)
+        results["sedd"] = test_sedd(data_dir, out_dir, all_logs)
     else:
         log("Skipping SEDD test")
         results["sedd"] = None
     
     # Test 5: DoT
     if not args.skip_dot:
-        results["dot"] = test_dot(data_dir, out_dir)
+        results["dot"] = test_dot(data_dir, out_dir, all_logs)
     else:
         log("Skipping DoT test")
         results["dot"] = None
     
     # Generate summary
-    all_passed = generate_summary(results, out_dir)
+    all_passed = generate_summary(results, out_dir, all_logs)
     
     if all_passed:
         log("\n✓ ALL TESTS PASSED - Pipeline is working correctly!")

@@ -107,3 +107,7 @@ retest.log
 *.pkl
 *.h5
 *.joblib
+
+# Trash folder (test runs, data, outputs)
+trash/
+**/trash/
