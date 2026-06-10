@@ -45,11 +45,21 @@ trash/sedd_runs/sedd_<model_mode>_<condition_mode>_<timestamp>/
 │   ├── sedd_...-best.ckpt    ← Best checkpoint
 │   └── sedd_...-last.ckpt    ← Last checkpoint
 ├── plots/
-│   ├── curves_epXXXX.png     ← Training curves + perplexity
-│   ├── code_dist_epXXXX.png  ← Real vs generated code distribution
-│   └── gen_hist_epXXXX.png   ← Generated histograms per class
+│   ├── curves_epXXXX.png     ← Training curves (300 DPI PNG)
+│   ├── curves_epXXXX.svg     ← Training curves (vector SVG)
+│   ├── code_dist_epXXXX.png  ← Code distribution (PNG)
+│   ├── code_dist_epXXXX.svg  ← Code distribution (SVG)
+│   ├── gen_hist_epXXXX.png   ← Per-class histograms (PNG)
+│   └── gen_hist_epXXXX.svg   ← Per-class histograms (SVG)
 └── report.json               ← Training summary
 ```
+
+### Plot Features
+- **300 DPI PNG** for quick viewing and presentations
+- **SVG vector graphics** for publication-quality papers
+- Professional typography with proper labels and titles
+- Colorblind-friendly palette
+- Automatic annotations (diversity metrics, distribution overlap, final values)
 
 ## Overview
 

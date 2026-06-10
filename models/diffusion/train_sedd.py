@@ -7,7 +7,8 @@ Train SEDD (Discrete Diffusion Transformer) on MeshGPT code sequences.
 Features:
   - Model sizes: small / medium / full
   - Conditioning: conditional (with class labels) / unconditional
-  - Rich plots: training curves, code distribution, per-class histograms
+  - Professional paper-quality plots (300 DPI PNG + SVG vector graphics)
+  - Plots: training curves, code distribution, per-class histograms
 
 Required Data:
   --data_dir must contain:
@@ -33,7 +34,16 @@ Outputs:
   --out_base/sedd_<model_mode>_<condition_mode>_<timestamp>/
       checkpoints/     ← Model checkpoints (best + last)
       plots/           ← Training curves, code distribution, histograms
+          *.png        ← 300 DPI raster for quick viewing
+          *.svg        ← Vector graphics for papers
       report.json      ← Training summary
+
+Plot Features:
+  - Publication-quality typography and styling
+  - Colorblind-friendly palette
+  - Automatic text wrapping for long labels
+  - Metrics annotations (diversity, overlap, final values)
+  - Seaborn integration (if installed) for enhanced aesthetics
 """
 
 import os
@@ -53,6 +63,14 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+from textwrap import wrap
+
+# Try to import seaborn for professional styling
+try:
+    import seaborn as sns
+    HAS_SEABORN = True
+except ImportError:
+    HAS_SEABORN = False
 
 # ── paths ─────────────────────────────────────────────────────────────────────
 SRC = os.path.dirname(os.path.abspath(__file__))
@@ -69,14 +87,54 @@ DATA_DIR = os.path.join(_TRASH, "data")
 OUT_BASE = os.path.join(_TRASH, "sedd_runs")
 
 # ── global plot style ──────────────────────────────────────────────────────────
+# Professional paper-quality styling
 plt.rcParams.update({
-    "figure.facecolor": "white", "axes.facecolor": "white",
-    "axes.edgecolor": "#CCCCCC", "axes.linewidth": 0.8,
-    "grid.color": "#E5E5E5", "grid.linewidth": 0.6,
+    "figure.facecolor": "white",
+    "axes.facecolor": "white",
+    "axes.edgecolor": "#333333",
+    "axes.linewidth": 0.8,
+    "grid.color": "#E5E5E5",
+    "grid.linewidth": 0.5,
     "font.family": "DejaVu Sans",
-    "axes.spines.top": False, "axes.spines.right": False,
+    "axes.spines.top": False,
+    "axes.spines.right": False,
+    "xtick.color": "#333333",
+    "ytick.color": "#333333",
+    "text.color": "#333333",
+    "axes.labelcolor": "#333333",
+    "axes.titlesize": 11,
+    "axes.labelsize": 10,
+    "xtick.labelsize": 9,
+    "ytick.labelsize": 9,
+    "legend.fontsize": 9,
+    "figure.titlesize": 14,
 })
-PALETTE = ["#5B8DB8", "#F4A35A", "#6DBF8A", "#D96B6B", "#A48CC4"]
+
+# Professional color palette (colorblind-friendly)
+PALETTE = {
+    "primary": "#5B8DB8",      # Steel blue
+    "secondary": "#E67E22",     # Warm orange
+    "tertiary": "#27AE60",      # Green
+    "quaternary": "#8E44AD",    # Purple
+    "accent": "#C0392B",        # Red
+    "neutral": "#7F8C8D",       # Gray
+    "dark": "#2C3E50",          # Dark blue-gray
+    "light": "#BDC3C7",         # Light gray
+}
+
+# Alias for backward compatibility
+PALETTE_LIST = [PALETTE["primary"], PALETTE["secondary"], PALETTE["tertiary"], 
+                PALETTE["quaternary"], PALETTE["accent"]]
+
+def _save_figure(fig, filepath: str, dpi: int = 300):
+    """Save figure as both PNG and SVG for paper quality."""
+    # Save PNG for quick viewing
+    fig.savefig(f"{filepath}.png", dpi=dpi, bbox_inches="tight", 
+                facecolor="white", edgecolor="none")
+    # Save SVG for vector quality in papers
+    fig.savefig(f"{filepath}.svg", format="svg", bbox_inches="tight",
+                facecolor="white", edgecolor="none")
+    plt.close(fig)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -109,12 +167,16 @@ class CodeSequenceDataset(Dataset):
 
 class EnhancedSEDDPlotCallback(Callback):
     """
-    Generates comprehensive plots every N epochs:
+    Professional paper-quality plotting callback.
+    
+    Generates publication-ready plots every N epochs:
       1. training_curves   — train/val loss + perplexity
       2. code_distribution — real vs generated code frequency
-      3. per_class_gen     — generated code histograms for each class
-      4. token_entropy     — entropy of generated distributions per class
-      5. code_heatmap      — per-class code usage heatmap (classes × codebook)
+      3. per_class_gen     — generated code histograms per class
+      4. token_entropy     — entropy analysis per class
+      5. code_heatmap      — class × codebook usage heatmap
+    
+    All plots saved as both PNG (300 DPI) and SVG (vector) for papers.
     """
 
     def __init__(self, plot_dir: str, val_dataset, vocab_size: int,
@@ -133,6 +195,10 @@ class EnhancedSEDDPlotCallback(Callback):
         self.val_losses = []
         self.perplexities = []
         self.epochs = []
+        
+        # Setup seaborn if available
+        if HAS_SEABORN:
+            sns.set_theme(style="whitegrid", context="paper", font_scale=1.1)
 
     def on_train_epoch_end(self, trainer, pl_module):
         metrics = trainer.callback_metrics
@@ -161,57 +227,112 @@ class EnhancedSEDDPlotCallback(Callback):
                 print(f"[PlotCallback] WARNING: {exc}")
 
     def _plot_training_curves(self, ep: int):
+        """Publication-quality training curves with proper typography."""
         fig = plt.figure(figsize=(14, 5), constrained_layout=True)
-        fig.suptitle(f"SEDD ({self.mode}) — Training Curves  [epoch {ep}]",
-                     fontsize=14, fontweight="bold")
-        gs = gridspec.GridSpec(1, 2, figure=fig, wspace=0.25)
+        title = f"SEDD {self.mode.title()} Training Progress (Epoch {ep})"
+        fig.suptitle(title, fontsize=14, fontweight="bold", y=1.02)
+        
+        gs = gridspec.GridSpec(1, 2, figure=fig, wspace=0.3)
 
-        ax = fig.add_subplot(gs[0, 0])
-        ax.plot(self.epochs, self.train_losses, color=PALETTE[0], lw=1.8, label="train_loss")
-        ax.plot(self.epochs, self.val_losses, color=PALETTE[1], lw=1.8, label="val_loss")
-        ax.set_xlabel("Epoch")
-        ax.set_ylabel("Cross-Entropy Loss")
-        ax.set_title("Loss")
-        ax.legend()
+        # Loss plot
+        ax1 = fig.add_subplot(gs[0, 0])
+        ax1.plot(self.epochs, self.train_losses, color=PALETTE["primary"], 
+                linewidth=2.0, label="Train Loss", alpha=0.9, marker="o", markersize=3)
+        ax1.plot(self.epochs, self.val_losses, color=PALETTE["secondary"], 
+                linewidth=2.0, label="Validation Loss", alpha=0.9, marker="s", markersize=3)
+        ax1.set_xlabel("Epoch", fontsize=11, labelpad=8)
+        ax1.set_ylabel("Cross-Entropy Loss", fontsize=11, labelpad=8)
+        ax1.set_title("Training & Validation Loss", fontsize=12, fontweight="semibold", pad=10)
+        ax1.legend(loc="best", frameon=True, framealpha=0.9, edgecolor="#CCCCCC")
+        ax1.grid(True, alpha=0.3, linestyle="-")
+        
+        # Add final values as text
+        if len(self.train_losses) > 0:
+            final_train = self.train_losses[-1]
+            final_val = self.val_losses[-1]
+            ax1.text(0.98, 0.98, f"Train: {final_train:.3f}\nVal: {final_val:.3f}",
+                    transform=ax1.transAxes, fontsize=9, verticalalignment="top",
+                    horizontalalignment="right", bbox=dict(boxstyle="round", 
+                    facecolor="white", edgecolor="#CCCCCC", alpha=0.8))
 
+        # Perplexity plot
         ax2 = fig.add_subplot(gs[0, 1])
-        ax2.plot(self.epochs, self.perplexities, color=PALETTE[2], lw=1.8)
-        ax2.set_xlabel("Epoch")
-        ax2.set_ylabel("Perplexity")
-        ax2.set_title("Perplexity")
+        ax2.plot(self.epochs, self.perplexities, color=PALETTE["tertiary"], 
+                linewidth=2.0, alpha=0.9, marker="o", markersize=3)
+        ax2.set_xlabel("Epoch", fontsize=11, labelpad=8)
+        ax2.set_ylabel("Perplexity (exp(loss))", fontsize=11, labelpad=8)
+        ax2.set_title("Model Perplexity", fontsize=12, fontweight="semibold", pad=10)
+        ax2.grid(True, alpha=0.3, linestyle="-")
+        
+        if len(self.perplexities) > 0:
+            final_perp = self.perplexities[-1]
+            ax2.text(0.98, 0.98, f"Final: {final_perp:.2f}",
+                    transform=ax2.transAxes, fontsize=9, verticalalignment="top",
+                    horizontalalignment="right", bbox=dict(boxstyle="round",
+                    facecolor="white", edgecolor="#CCCCCC", alpha=0.8))
 
-        fig.savefig(os.path.join(self.plot_dir, f"curves_ep{ep:04d}.png"), dpi=200)
-        plt.close()
+        _save_figure(fig, os.path.join(self.plot_dir, f"curves_ep{ep:04d}"), dpi=300)
 
     def _plot_code_distribution(self, model, ep: int):
+        """Professional code distribution comparison: Real vs Generated."""
         device = next(model.parameters()).device
+        
+        # Collect real codes from validation set
         real_codes = []
-        for i in range(min(200, len(self.val_ds))):
+        n_samples = min(500, len(self.val_ds))
+        for i in range(n_samples):
             real_codes.append(self.val_ds[i]["input_ids"].numpy())
         real_hist = np.bincount(np.concatenate(real_codes), minlength=self.vocab_size).astype(float)
         real_hist /= real_hist.sum() + 1e-8
 
-        n_gen = min(100, len(self.val_ds))
+        # Generate samples
+        n_gen = min(500, len(self.val_ds))
         cls_lbl = None
         if self.mode == "conditional" and hasattr(model, 'num_classes') and model.num_classes:
             cls_lbl = torch.randint(0, model.num_classes, (n_gen,), device=device)
-        gen = model.generate(batch_size=n_gen, seq_len=self.seq_len,
-                             class_labels=cls_lbl, temperature=1.0, num_steps=50)
+        
+        with torch.no_grad():
+            gen = model.generate(batch_size=n_gen, seq_len=self.seq_len,
+                                class_labels=cls_lbl, temperature=1.0, num_steps=50)
         gen_hist = np.bincount(gen.cpu().numpy().flatten(), minlength=self.vocab_size).astype(float)
         gen_hist /= gen_hist.sum() + 1e-8
 
-        fig, ax = plt.subplots(figsize=(12, 4))
+        # Compute overlap for annotation
+        overlap = np.sum(np.minimum(real_hist, gen_hist))
+        
+        # Create professional plot
+        fig, ax = plt.subplots(figsize=(14, 5), constrained_layout=True)
         x = np.arange(self.vocab_size)
-        ax.bar(x, real_hist, alpha=0.6, label="Real", color=PALETTE[0])
-        ax.bar(x, gen_hist, alpha=0.6, label="Generated", color=PALETTE[1])
-        ax.set_xlabel("Code ID")
-        ax.set_ylabel("Frequency")
-        ax.set_title(f"Code Distribution — {self.mode} [epoch {ep}]")
-        ax.legend()
-        fig.savefig(os.path.join(self.plot_dir, f"code_dist_ep{ep:04d}.png"), dpi=200)
-        plt.close()
+        
+        # Plot with professional styling
+        ax.fill_between(x, real_hist, alpha=0.7, color=PALETTE["primary"], 
+                       label=f"Real (n={n_samples})", step="mid", linewidth=0)
+        ax.fill_between(x, gen_hist, alpha=0.5, color=PALETTE["secondary"], 
+                       label=f"Generated (n={n_gen})", step="mid", linewidth=0)
+        
+        # Add outline
+        ax.plot(x, real_hist, color=PALETTE["primary"], linewidth=1.5, alpha=0.9)
+        ax.plot(x, gen_hist, color=PALETTE["secondary"], linewidth=1.5, alpha=0.9)
+        
+        ax.set_xlabel("Code ID", fontsize=12, labelpad=10)
+        ax.set_ylabel("Normalized Frequency", fontsize=12, labelpad=10)
+        ax.set_title(f"Code Distribution: Real vs Generated\n{self.mode.title()} Mode, Epoch {ep}", 
+                    fontsize=13, fontweight="bold", pad=12)
+        ax.legend(loc="upper right", frameon=True, framealpha=0.95, 
+                 edgecolor="#AAAAAA", fontsize=11)
+        ax.set_xlim(0, self.vocab_size)
+        ax.grid(True, alpha=0.3, axis="y", linestyle="-")
+        
+        # Add overlap annotation
+        ax.text(0.02, 0.98, f"Distribution Overlap: {overlap:.3f}",
+               transform=ax.transAxes, fontsize=11, verticalalignment="top",
+               bbox=dict(boxstyle="round,pad=0.3", facecolor="white", 
+                        edgecolor=PALETTE["dark"], alpha=0.9))
+        
+        _save_figure(fig, os.path.join(self.plot_dir, f"code_dist_ep{ep:04d}"), dpi=300)
 
     def _plot_per_class_gen(self, model, ep: int):
+        """Publication-quality per-class generation histograms."""
         device = next(model.parameters()).device
         n_cls = min(10, getattr(model, 'num_classes', 10) or 10)
         class_labels = torch.arange(n_cls, device=device)
@@ -220,26 +341,62 @@ class EnhancedSEDDPlotCallback(Callback):
         if self.mode == "conditional" and hasattr(model, 'num_classes') and model.num_classes:
             cls_lbl = class_labels
 
-        samples = model.generate(batch_size=n_cls, seq_len=self.seq_len,
-                                 class_labels=cls_lbl, temperature=1.0, num_steps=50)
+        with torch.no_grad():
+            samples = model.generate(batch_size=n_cls, seq_len=self.seq_len,
+                                    class_labels=cls_lbl, temperature=1.0, num_steps=50)
 
-        fig, axes = plt.subplots(2, 5, figsize=(16, 6))
+        # Professional multi-panel figure
+        n_cols = 5
+        n_rows = int(np.ceil(n_cls / n_cols))
+        fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols * 3.2, n_rows * 3.0),
+                                 constrained_layout=True)
         axes = axes.flatten()
+        
         for i in range(n_cls):
+            ax = axes[i]
             codes = samples[i].cpu().numpy()
-            axes[i].hist(codes, bins=min(50, self.vocab_size), color="steelblue", alpha=0.8)
-            cls_name = MODELNET40_CLASSES[i] if i < len(MODELNET40_CLASSES) else str(i)
-            axes[i].set_title(cls_name, fontsize=9)
-        plt.suptitle(f"Generated Code Histograms — {self.mode} [epoch {ep}]")
-        fig.savefig(os.path.join(self.plot_dir, f"gen_hist_ep{ep:04d}.png"), dpi=200)
-        plt.close()
+            
+            # Professional histogram with KDE if seaborn available
+            if HAS_SEABORN:
+                sns.histplot(codes, bins=min(40, self.vocab_size), ax=ax,
+                           color=PALETTE["primary"], alpha=0.7, edgecolor="none")
+            else:
+                ax.hist(codes, bins=min(40, self.vocab_size), 
+                       color=PALETTE["primary"], alpha=0.7, edgecolor="none")
+            
+            cls_name = MODELNET40_CLASSES[i] if i < len(MODELNET40_CLASSES) else f"Class {i}"
+            # Wrap long class names
+            wrapped_title = "\n".join(wrap(cls_name.title(), 15))
+            ax.set_title(wrapped_title, fontsize=10, fontweight="semibold", pad=8)
+            ax.set_xlabel("Code ID", fontsize=9, labelpad=6)
+            ax.set_ylabel("Count", fontsize=9, labelpad=6)
+            ax.tick_params(axis="both", labelsize=8)
+            ax.grid(True, alpha=0.3, axis="y")
+            
+            # Add code diversity metric
+            unique_codes = len(np.unique(codes))
+            diversity = unique_codes / self.vocab_size
+            ax.text(0.98, 0.98, f"Unique: {unique_codes}\nDiversity: {diversity:.2%}",
+                   transform=ax.transAxes, fontsize=8, verticalalignment="top",
+                   horizontalalignment="right", 
+                   bbox=dict(boxstyle="round,pad=0.2", facecolor="white",
+                            edgecolor=PALETTE["light"], alpha=0.9))
+        
+        # Hide unused subplots
+        for idx in range(n_cls, len(axes)):
+            axes[idx].set_visible(False)
+        
+        fig.suptitle(f"Per-Class Generated Code Distributions\n{self.mode.title()} Mode, Epoch {ep}",
+                    fontsize=13, fontweight="bold", y=1.02)
+        
+        _save_figure(fig, os.path.join(self.plot_dir, f"gen_hist_ep{ep:04d}"), dpi=300)
 
     def _plot_token_entropy(self, model, ep: int):
-        # Simplified entropy plot
+        """Token entropy analysis per class (simplified placeholder)."""
         pass
 
     def _plot_code_heatmap(self, model, ep: int):
-        # Simplified heatmap
+        """Class × Codebook heatmap (simplified placeholder)."""
         pass
 
 
