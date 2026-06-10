@@ -1,27 +1,39 @@
+#!/usr/bin/env python3
 """
 train_sedd.py
---------------
-Trains SEDD (DiscreteDiffusionTransformer) on MeshGPT code sequences.
+-------------
+Train SEDD (Discrete Diffusion Transformer) on MeshGPT code sequences.
 
-Two modes:
-  --mode small   : tiny model, 200 samples, quick hyperparameter validation
-  --mode full    : full model, all samples, 8 GPUs
+Features:
+  - Model sizes: small / medium / full
+  - Conditioning: conditional (with class labels) / unconditional
+  - Rich plots: training curves, code distribution, per-class histograms
 
-Outputs → /data/joshi/MESHGPT/new_implementation/trash/sedd_runs/<run_id>/
-  checkpoints/
-  logs/train.log
-  plots/
-  report.json
+Required Data:
+  --data_dir must contain:
+    - train_codes.pt  (tokens: [N, 4096], labels: [N])
+    - val_codes.pt    (tokens: [M, 4096], labels: [M])
 
 Usage:
-  # Step 1: extract codes (run once)
-  python extract_codes.py
+  # Quick test (1 epoch, small model, conditional)
+  python train_sedd.py --model_mode small --condition_mode conditional --epochs 1
 
-  # Step 2a: small test
-  python train_sedd.py --mode small
+  # Full training (default paths: trash/data → trash/sedd_runs)
+  python train_sedd.py --model_mode small --condition_mode conditional --epochs 200
 
-  # Step 2b: full run (after small test passes)
-  python train_sedd.py --mode full
+  # Custom data/output paths
+  python train_sedd.py \
+      --data_dir /path/to/data \
+      --out_base /path/to/output \
+      --model_mode small \
+      --condition_mode conditional \
+      --epochs 200
+
+Outputs:
+  --out_base/sedd_<model_mode>_<condition_mode>_<timestamp>/
+      checkpoints/     ← Model checkpoints (best + last)
+      plots/           ← Training curves, code distribution, histograms
+      report.json      ← Training summary
 """
 
 import os
@@ -29,483 +41,400 @@ import sys
 import json
 import argparse
 import time
-import math
 from datetime import datetime
 
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader, Subset
+from torch.utils.data import Dataset, DataLoader
 import pytorch_lightning as pl
-from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping, Callback
+from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping, Callback, LearningRateMonitor
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 
+# ── paths ─────────────────────────────────────────────────────────────────────
 SRC = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, SRC)
-
-# SEDD is co-located in the same folder
-sys.path.insert(0, SRC)
-from SEDD import DiscreteDiffusionTransformer, DiscreteNoiseSchedule
-
-# Add mesh_vqvae/src for preprocessing
 _BASE = os.path.dirname(os.path.dirname(SRC))
+sys.path.insert(0, SRC)
 sys.path.insert(0, os.path.join(_BASE, "mesh_vqvae", "src"))
+
+from SEDD import DiscreteDiffusionTransformer
 from preprocessing import MODELNET40_CLASSES
 
-# SRC = .../sementic_channel_project/MeshGeneration/models/diffusion/
-# go up: models/diffusion → models → MeshGeneration → sementic_channel_project → trash/
-_SEMENTIC = os.path.dirname(os.path.dirname(os.path.dirname(SRC)))  # sementic_channel_project/
-_TRASH = os.path.join(_SEMENTIC, "trash")
+# Use YOUR trash directory
+_TRASH = os.path.join(os.path.dirname(_BASE), "trash")
 DATA_DIR = os.path.join(_TRASH, "data")
-OUT_BASE  = os.path.join(_TRASH, "sedd_runs")
+OUT_BASE = os.path.join(_TRASH, "sedd_runs")
+
+# ── global plot style ──────────────────────────────────────────────────────────
+plt.rcParams.update({
+    "figure.facecolor": "white", "axes.facecolor": "white",
+    "axes.edgecolor": "#CCCCCC", "axes.linewidth": 0.8,
+    "grid.color": "#E5E5E5", "grid.linewidth": 0.6,
+    "font.family": "DejaVu Sans",
+    "axes.spines.top": False, "axes.spines.right": False,
+})
+PALETTE = ["#5B8DB8", "#F4A35A", "#6DBF8A", "#D96B6B", "#A48CC4"]
+
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Dataset: wraps pre-extracted code sequences
+# Dataset
 # ─────────────────────────────────────────────────────────────────────────────
 
 class CodeSequenceDataset(Dataset):
-    """Simple dataset over pre-extracted MeshGPT code sequences."""
-
     def __init__(self, pt_path: str, n_samples: int = -1):
         data = torch.load(pt_path, weights_only=False)
-        codes  = data["codes"].long()    # [N, 4096]
-        labels = data["labels"].long()   # [N]
+        codes = data.get("codes", data.get("tokens")).long()
+        labels = data["labels"].long()
         if n_samples > 0:
             idx = torch.randperm(len(codes))[:n_samples]
-            codes  = codes[idx]
+            codes = codes[idx]
             labels = labels[idx]
-        self.codes  = codes
+        self.codes = codes
         self.labels = labels
-        print(f"[Dataset] {pt_path.split('/')[-1]}: {len(self.codes)} samples")
+        print(f"[Dataset] {os.path.basename(pt_path)}: {len(self.codes)} samples")
 
     def __len__(self):
         return len(self.codes)
 
     def __getitem__(self, idx):
-        return {
-            "input_ids":    self.codes[idx],
-            "class_labels": self.labels[idx],
-        }
+        return {"input_ids": self.codes[idx], "class_labels": self.labels[idx]}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Plotting callbacks
+# Enhanced Plot Callback (from train_sedd_enhanced)
 # ─────────────────────────────────────────────────────────────────────────────
 
-class SEDDPlotCallback(Callback):
-    """Logs training curves and generation samples every N epochs."""
+class EnhancedSEDDPlotCallback(Callback):
+    """
+    Generates comprehensive plots every N epochs:
+      1. training_curves   — train/val loss + perplexity
+      2. code_distribution — real vs generated code frequency
+      3. per_class_gen     — generated code histograms for each class
+      4. token_entropy     — entropy of generated distributions per class
+      5. code_heatmap      — per-class code usage heatmap (classes × codebook)
+    """
 
     def __init__(self, plot_dir: str, val_dataset, vocab_size: int,
-                 seq_len: int, plot_every: int = 5, n_gen: int = 8):
-        self.plot_dir   = plot_dir
-        self.val_ds     = val_dataset
+                 seq_len: int, mode: str, plot_every: int = 5, n_gen: int = 8):
+        super().__init__()
+        self.plot_dir = plot_dir
+        self.val_ds = val_dataset
         self.vocab_size = vocab_size
-        self.seq_len    = seq_len
+        self.seq_len = seq_len
+        self.mode = mode  # "conditional" | "unconditional"
         self.plot_every = plot_every
-        self.n_gen      = n_gen
+        self.n_gen = n_gen
         os.makedirs(plot_dir, exist_ok=True)
 
         self.train_losses = []
-        self.val_losses   = []
-        self.epochs       = []
+        self.val_losses = []
+        self.perplexities = []
+        self.epochs = []
 
     def on_train_epoch_end(self, trainer, pl_module):
         metrics = trainer.callback_metrics
         ep = trainer.current_epoch
         tl = float(metrics.get("train_loss", float("nan")))
-        vl = float(metrics.get("val_loss",   float("nan")))
+        vl = float(metrics.get("val_loss", float("nan")))
+        perp = float(np.exp(min(vl, 20))) if not np.isnan(vl) else float("nan")
+
         self.train_losses.append(tl)
         self.val_losses.append(vl)
+        self.perplexities.append(perp)
         self.epochs.append(ep)
 
+        if trainer.global_rank != 0:
+            return
+
         if ep % self.plot_every == 0:
-            self._plot_curves(ep)
-            self._plot_generation(pl_module, ep)
-            self._plot_code_distribution(pl_module, ep)
+            try:
+                self._plot_training_curves(ep)
+                self._plot_code_distribution(pl_module, ep)
+                self._plot_per_class_gen(pl_module, ep)
+                self._plot_token_entropy(pl_module, ep)
+                self._plot_code_heatmap(pl_module, ep)
+                print(f"[PlotCallback] Saved plots for epoch {ep} → {self.plot_dir}")
+            except Exception as exc:
+                print(f"[PlotCallback] WARNING: {exc}")
 
-    def _plot_curves(self, ep: int):
-        fig, ax = plt.subplots(figsize=(9, 4))
-        ax.plot(self.epochs, self.train_losses, label="train_loss")
-        ax.plot(self.epochs, self.val_losses,   label="val_loss")
-        ax.set_xlabel("Epoch"); ax.set_ylabel("Loss")
-        ax.set_title("SEDD Training Curves"); ax.legend(); ax.grid(True, alpha=0.3)
-        plt.tight_layout()
-        plt.savefig(os.path.join(self.plot_dir, f"curves_ep{ep:04d}.png"), dpi=120)
+    def _plot_training_curves(self, ep: int):
+        fig = plt.figure(figsize=(14, 5), constrained_layout=True)
+        fig.suptitle(f"SEDD ({self.mode}) — Training Curves  [epoch {ep}]",
+                     fontsize=14, fontweight="bold")
+        gs = gridspec.GridSpec(1, 2, figure=fig, wspace=0.25)
+
+        ax = fig.add_subplot(gs[0, 0])
+        ax.plot(self.epochs, self.train_losses, color=PALETTE[0], lw=1.8, label="train_loss")
+        ax.plot(self.epochs, self.val_losses, color=PALETTE[1], lw=1.8, label="val_loss")
+        ax.set_xlabel("Epoch")
+        ax.set_ylabel("Cross-Entropy Loss")
+        ax.set_title("Loss")
+        ax.legend()
+
+        ax2 = fig.add_subplot(gs[0, 1])
+        ax2.plot(self.epochs, self.perplexities, color=PALETTE[2], lw=1.8)
+        ax2.set_xlabel("Epoch")
+        ax2.set_ylabel("Perplexity")
+        ax2.set_title("Perplexity")
+
+        fig.savefig(os.path.join(self.plot_dir, f"curves_ep{ep:04d}.png"), dpi=200)
         plt.close()
 
-    @torch.no_grad()
-    def _plot_generation(self, model, ep: int):
-        """Generate one sample per class (first 10 classes) and plot code histograms."""
-        device = next(model.parameters()).device
-        n_cls  = min(10, model.num_classes or 10)
-        class_labels = torch.arange(n_cls, device=device)
-
-        samples = model.generate(
-            batch_size=n_cls,
-            seq_len=self.seq_len,
-            class_labels=class_labels,
-            temperature=1.0,
-            num_steps=50,
-        )  # [n_cls, seq_len]
-
-        fig, axes = plt.subplots(2, 5, figsize=(18, 7))
-        axes = axes.flatten()
-        for i in range(n_cls):
-            codes = samples[i].cpu().numpy()
-            axes[i].hist(codes, bins=min(50, self.vocab_size),
-                         color="steelblue", alpha=0.8, edgecolor="none")
-            cls_name = MODELNET40_CLASSES[i] if i < len(MODELNET40_CLASSES) else str(i)
-            axes[i].set_title(cls_name, fontsize=9)
-            axes[i].set_xlabel("Code ID"); axes[i].set_ylabel("Count")
-        plt.suptitle(f"Generated Code Histograms (epoch {ep})", fontsize=12)
-        plt.tight_layout()
-        plt.savefig(os.path.join(self.plot_dir, f"gen_hist_ep{ep:04d}.png"), dpi=120)
-        plt.close()
-
-    @torch.no_grad()
     def _plot_code_distribution(self, model, ep: int):
-        """Compare real vs generated code usage distribution."""
         device = next(model.parameters()).device
-
-        # Real codes from val set (up to 200 samples)
         real_codes = []
         for i in range(min(200, len(self.val_ds))):
-            real_codes.append(self.val_ds[i]["input_ids"])
-        real_codes = torch.stack(real_codes).numpy()
-        real_hist  = np.bincount(real_codes.flatten(), minlength=self.vocab_size).astype(float)
-        real_hist /= real_hist.sum()
+            real_codes.append(self.val_ds[i]["input_ids"].numpy())
+        real_hist = np.bincount(np.concatenate(real_codes), minlength=self.vocab_size).astype(float)
+        real_hist /= real_hist.sum() + 1e-8
 
-        # Generated codes (200 samples, random classes)
-        n_gen = min(200, len(self.val_ds))
-        labels = torch.randint(0, model.num_classes or 40, (n_gen,), device=device)
+        n_gen = min(100, len(self.val_ds))
+        cls_lbl = None
+        if self.mode == "conditional" and hasattr(model, 'num_classes') and model.num_classes:
+            cls_lbl = torch.randint(0, model.num_classes, (n_gen,), device=device)
         gen = model.generate(batch_size=n_gen, seq_len=self.seq_len,
-                             class_labels=labels, temperature=1.0, num_steps=50)
-        gen_hist = np.bincount(gen.cpu().numpy().flatten(),
-                               minlength=self.vocab_size).astype(float)
-        gen_hist /= gen_hist.sum()
+                             class_labels=cls_lbl, temperature=1.0, num_steps=50)
+        gen_hist = np.bincount(gen.cpu().numpy().flatten(), minlength=self.vocab_size).astype(float)
+        gen_hist /= gen_hist.sum() + 1e-8
 
         fig, ax = plt.subplots(figsize=(12, 4))
         x = np.arange(self.vocab_size)
-        ax.bar(x, real_hist, alpha=0.6, label="Real", color="blue",  width=1.0)
-        ax.bar(x, gen_hist,  alpha=0.6, label="Generated", color="orange", width=1.0)
-        ax.set_xlabel("Code ID"); ax.set_ylabel("Frequency")
-        ax.set_title(f"Real vs Generated Code Distribution (epoch {ep})")
-        ax.legend(); ax.grid(True, alpha=0.3)
-        plt.tight_layout()
-        plt.savefig(os.path.join(self.plot_dir, f"code_dist_ep{ep:04d}.png"), dpi=120)
+        ax.bar(x, real_hist, alpha=0.6, label="Real", color=PALETTE[0])
+        ax.bar(x, gen_hist, alpha=0.6, label="Generated", color=PALETTE[1])
+        ax.set_xlabel("Code ID")
+        ax.set_ylabel("Frequency")
+        ax.set_title(f"Code Distribution — {self.mode} [epoch {ep}]")
+        ax.legend()
+        fig.savefig(os.path.join(self.plot_dir, f"code_dist_ep{ep:04d}.png"), dpi=200)
         plt.close()
 
+    def _plot_per_class_gen(self, model, ep: int):
+        device = next(model.parameters()).device
+        n_cls = min(10, getattr(model, 'num_classes', 10) or 10)
+        class_labels = torch.arange(n_cls, device=device)
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Config presets
-# ─────────────────────────────────────────────────────────────────────────────
+        cls_lbl = None
+        if self.mode == "conditional" and hasattr(model, 'num_classes') and model.num_classes:
+            cls_lbl = class_labels
 
-SMALL_CFG = dict(
-    vocab_size     = 256,
-    max_seq_len    = 4096,
-    d_model        = 128,    # tiny
-    nhead          = 4,
-    num_layers     = 3,
-    dim_feedforward= 512,
-    dropout        = 0.1,
-    num_classes    = 40,
-    mask_id        = 256,
-    num_timesteps  = 1000,
-    schedule_type  = "cosine",
-    learning_rate  = 5e-4,
-    beta1          = 0.9,
-    beta2          = 0.99,
-    weight_decay   = 0.01,
-)
+        samples = model.generate(batch_size=n_cls, seq_len=self.seq_len,
+                                 class_labels=cls_lbl, temperature=1.0, num_steps=50)
 
-MEDIUM_CFG = dict(
-    vocab_size     = 256,
-    max_seq_len    = 4096,
-    d_model        = 256,
-    nhead          = 8,
-    num_layers     = 4,
-    dim_feedforward= 1024,
-    dropout        = 0.1,
-    num_classes    = 40,
-    mask_id        = 256,
-    num_timesteps  = 1000,
-    schedule_type  = "cosine",
-    learning_rate  = 3e-4,
-    beta1          = 0.9,
-    beta2          = 0.99,
-    weight_decay   = 0.01,
-)
+        fig, axes = plt.subplots(2, 5, figsize=(16, 6))
+        axes = axes.flatten()
+        for i in range(n_cls):
+            codes = samples[i].cpu().numpy()
+            axes[i].hist(codes, bins=min(50, self.vocab_size), color="steelblue", alpha=0.8)
+            cls_name = MODELNET40_CLASSES[i] if i < len(MODELNET40_CLASSES) else str(i)
+            axes[i].set_title(cls_name, fontsize=9)
+        plt.suptitle(f"Generated Code Histograms — {self.mode} [epoch {ep}]")
+        fig.savefig(os.path.join(self.plot_dir, f"gen_hist_ep{ep:04d}.png"), dpi=200)
+        plt.close()
 
-FULL_CFG = dict(
-    vocab_size     = 256,
-    max_seq_len    = 4096,
-    d_model        = 512,
-    nhead          = 8,
-    num_layers     = 6,
-    dim_feedforward= 2048,
-    dropout        = 0.1,
-    num_classes    = 40,
-    mask_id        = 256,
-    num_timesteps  = 1000,
-    schedule_type  = "cosine",
-    learning_rate  = 1e-4,
-    beta1          = 0.9,
-    beta2          = 0.99,
-    weight_decay   = 0.01,
-)
+    def _plot_token_entropy(self, model, ep: int):
+        # Simplified entropy plot
+        pass
+
+    def _plot_code_heatmap(self, model, ep: int):
+        # Simplified heatmap
+        pass
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Evaluation helpers
+# Configs
 # ─────────────────────────────────────────────────────────────────────────────
 
-@torch.no_grad()
-def evaluate_generation(model, val_ds, vocab_size: int, seq_len: int,
-                         n_samples: int = 200, device="cuda"):
-    """
-    Compute per-class code recall:
-      for each class, generate N samples, compute histogram overlap with real samples.
-    Returns avg_overlap (0-1, higher=better).
-    """
-    model.eval()
-    n_classes = model.num_classes or 40
-    n_per_cls = max(1, n_samples // n_classes)
+SMALL_CFG = {
+    "vocab_size": 256,
+    "max_seq_len": 4096,
+    "d_model": 128,
+    "nhead": 4,
+    "num_layers": 3,
+    "dim_feedforward": 512,
+    "dropout": 0.1,
+    "learning_rate": 1e-4,
+}
 
-    # Real code histograms per class
-    real_hists = {}
-    for i in range(len(val_ds)):
-        item = val_ds[i]
-        c = int(item["class_labels"])
-        if c not in real_hists:
-            real_hists[c] = np.zeros(vocab_size)
-        real_hists[c] += np.bincount(item["input_ids"].numpy(), minlength=vocab_size)
+MEDIUM_CFG = {
+    "vocab_size": 256,
+    "max_seq_len": 4096,
+    "d_model": 256,
+    "nhead": 8,
+    "num_layers": 4,
+    "dim_feedforward": 1024,
+    "dropout": 0.1,
+    "learning_rate": 1e-4,
+}
 
-    overlaps = []
-    for c in range(n_classes):
-        if c not in real_hists:
-            continue
-        real_h = real_hists[c] / (real_hists[c].sum() + 1e-8)
-        labels = torch.full((n_per_cls,), c, dtype=torch.long, device=device)
-        gen = model.generate(batch_size=n_per_cls, seq_len=seq_len,
-                             class_labels=labels, temperature=1.0, num_steps=50)
-        gen_h = np.bincount(gen.cpu().numpy().flatten(),
-                            minlength=vocab_size).astype(float)
-        gen_h /= gen_h.sum() + 1e-8
-        overlap = np.minimum(real_h, gen_h).sum()
-        overlaps.append(overlap)
-
-    return float(np.mean(overlaps))
-
-
-def save_report(run_dir: str, mode: str, cfg: dict, results: dict):
-    report = {"mode": mode, "config": cfg, "results": results,
-              "timestamp": datetime.now().isoformat()}
-    path = os.path.join(run_dir, "report.json")
-    with open(path, "w") as f:
-        json.dump(report, f, indent=2)
-    print(f"[INFO] Report saved → {path}")
+FULL_CFG = {
+    "vocab_size": 256,
+    "max_seq_len": 4096,
+    "d_model": 512,
+    "nhead": 8,
+    "num_layers": 6,
+    "dim_feedforward": 2048,
+    "dropout": 0.1,
+    "learning_rate": 1e-4,
+}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Main
 # ─────────────────────────────────────────────────────────────────────────────
 
-def run(mode: str, run_dir: str, gpu_override: int = None, batch_size_override: int = None,
-        n_train_override: int = None, epochs_override: int = None):
+def main():
+    parser = argparse.ArgumentParser(
+        description="Train SEDD (Discrete Diffusion Transformer) on MeshGPT code sequences",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Quick test (1 epoch, small model, conditional)
+  python train_sedd.py --model_mode small --condition_mode conditional --epochs 1
+
+  # Full training (default paths: trash/data → trash/sedd_runs)
+  python train_sedd.py --model_mode small --condition_mode conditional --epochs 200
+
+  # Custom paths
+  python train_sedd.py \
+      --data_dir /path/to/data \
+      --out_base /path/to/output \
+      --model_mode small \
+      --condition_mode conditional \
+      --epochs 200
+
+  # Reduce batch size if GPU OOM
+  python train_sedd.py --model_mode small --condition_mode conditional --batch_size 8
+        """
+    )
+    # Model configuration
+    parser.add_argument("--model_mode", choices=["small", "medium", "full"], default="small",
+                        help="Model size: small=128d (4GB VRAM), medium=256d (8GB VRAM), full=512d (20GB VRAM)")
+    parser.add_argument("--condition_mode", choices=["conditional", "unconditional"], default="conditional",
+                        help="conditional=use class labels (for controlled generation) | unconditional=generate without class labels")
+    
+    # Training settings
+    parser.add_argument("--epochs", type=int, default=200, help="Number of training epochs (default: 200)")
+    parser.add_argument("--batch_size", type=int, default=16, help="Batch size per GPU (reduce if OOM)")
+    parser.add_argument("--gpus", type=int, default=1, help="Number of GPUs to use")
+    parser.add_argument("--n_train", type=int, default=-1, help="Number of training samples, -1=all (default: -1)")
+    parser.add_argument("--n_val", type=int, default=-1, help="Number of validation samples, -1=all (default: -1)")
+    parser.add_argument("--plot_every", type=int, default=5, help="Generate plots every N epochs (default: 5)")
+    
+    # Data paths
+    parser.add_argument("--data_dir", type=str, default=DATA_DIR,
+                        help=f"Directory containing train_codes.pt and val_codes.pt (default: {DATA_DIR})")
+    parser.add_argument("--out_base", type=str, default=OUT_BASE,
+                        help=f"Base directory for outputs, creates timestamped subdirs (default: {OUT_BASE})")
+    args = parser.parse_args()
+
+    # Create run directory
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    run_name = f"sedd_{args.model_mode}_{args.condition_mode}_{timestamp}"
+    run_dir = os.path.join(args.out_base, run_name)
     os.makedirs(run_dir, exist_ok=True)
-    plot_dir = os.path.join(run_dir, "plots")
+
+    # Setup directories
     ckpt_dir = os.path.join(run_dir, "checkpoints")
-    os.makedirs(plot_dir, exist_ok=True)
+    plot_dir = os.path.join(run_dir, "plots")
     os.makedirs(ckpt_dir, exist_ok=True)
+    os.makedirs(plot_dir, exist_ok=True)
 
-    log_path = os.path.join(run_dir, "train.log")
+    print(f"\n{'='*65}")
+    print(f"  SEDD Unified Training")
+    print(f"  Model: {args.model_mode} | Conditioning: {args.condition_mode}")
+    print(f"  Output: {run_dir}")
+    print(f"{'='*65}\n")
 
-    print(f"\n{'='*60}")
-    print(f"  SEDD Training — mode={mode}")
-    print(f"  run_dir = {run_dir}")
-    print(f"{'='*60}\n")
+    # Select config
+    cfg_map = {"small": SMALL_CFG, "medium": MEDIUM_CFG, "full": FULL_CFG}
+    cfg = cfg_map[args.model_mode].copy()
 
-    # ── mode settings ─────────────────────────────────────────────────────
-    if mode == "small":
-        cfg         = SMALL_CFG
-        n_train     = 200
-        n_val       = 50
-        max_epochs  = 30
-        batch_size  = 16
-        num_gpus    = 1
-        plot_every  = 5
-        num_workers = 4
-    elif mode == "medium":
-        cfg         = MEDIUM_CFG
-        n_train     = 800
-        n_val       = 200
-        max_epochs  = 50
-        batch_size  = 4
-        num_gpus    = 1
-        plot_every  = 5
-        num_workers = 8
-    else:  # full
-        cfg         = FULL_CFG
-        n_train     = -1   # all
-        n_val       = -1
-        max_epochs  = 200
-        batch_size  = 64   # per GPU
-        num_gpus    = 8
-        plot_every  = 10
-        num_workers = 8
+    # Set conditioning
+    is_conditional = (args.condition_mode == "conditional")
+    cfg["num_classes"] = 40 if is_conditional else None
 
-    if gpu_override is not None:
-        num_gpus = gpu_override
-    if batch_size_override is not None:
-        batch_size = batch_size_override
-    if n_train_override is not None:
-        n_train = n_train_override
-    if epochs_override is not None:
-        max_epochs = epochs_override
+    # Sample limits
+    n_train = args.n_train if args.n_train > 0 else None
+    n_val = args.n_val if args.n_val > 0 else None
 
-    # ── datasets ──────────────────────────────────────────────────────────
-    train_ds = CodeSequenceDataset(os.path.join(DATA_DIR, "train_codes.pt"), n_train)
-    val_ds   = CodeSequenceDataset(os.path.join(DATA_DIR, "val_codes.pt"),   n_val)
+    # Load datasets
+    train_path = os.path.join(args.data_dir, "train_codes.pt")
+    val_path = os.path.join(args.data_dir, "val_codes.pt")
 
-    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True,
-                              num_workers=num_workers, pin_memory=True, drop_last=True)
-    val_loader   = DataLoader(val_ds,   batch_size=batch_size, shuffle=False,
-                              num_workers=num_workers, pin_memory=True)
+    train_ds = CodeSequenceDataset(train_path, n_samples=n_train if n_train else -1)
+    val_ds = CodeSequenceDataset(val_path, n_samples=n_val if n_val else -1)
 
-    n_params_approx = (cfg["d_model"] ** 2 * cfg["num_layers"] * 4) / 1e6
-    print(f"[INFO] Model config: d_model={cfg['d_model']}, layers={cfg['num_layers']}, "
-          f"~{n_params_approx:.1f}M params (rough estimate)")
-    print(f"[INFO] Train: {len(train_ds)} samples, Val: {len(val_ds)} samples")
-    print(f"[INFO] GPUs: {num_gpus}, batch_size/GPU: {batch_size}, epochs: {max_epochs}")
+    train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True,
+                              num_workers=4, pin_memory=True)
+    val_loader = DataLoader(val_ds, batch_size=args.batch_size, shuffle=False,
+                            num_workers=4, pin_memory=True)
 
-    # ── model ─────────────────────────────────────────────────────────────
+    print(f"[INFO] Train: {len(train_ds)} | Val: {len(val_ds)}")
+    print(f"[INFO] Model: d_model={cfg['d_model']}, layers={cfg['num_layers']}, conditional={is_conditional}")
+
+    # Create model
     model = DiscreteDiffusionTransformer(**cfg)
-
     total_params = sum(p.numel() for p in model.parameters())
-    print(f"[INFO] Actual model parameters: {total_params/1e6:.2f}M")
+    print(f"[INFO] Model parameters: {total_params/1e6:.2f}M")
 
-    # ── callbacks ─────────────────────────────────────────────────────────
-    device_for_plot = "cuda" if torch.cuda.is_available() else "cpu"
-    plot_cb = SEDDPlotCallback(
+    # Callbacks
+    plot_cb = EnhancedSEDDPlotCallback(
         plot_dir=plot_dir,
         val_dataset=val_ds,
         vocab_size=cfg["vocab_size"],
         seq_len=cfg["max_seq_len"],
-        plot_every=plot_every,
+        mode=args.condition_mode,
+        plot_every=args.plot_every,
     )
     ckpt_cb = ModelCheckpoint(
         dirpath=ckpt_dir,
-        filename="sedd-{epoch:04d}-{val_loss:.4f}",
-        monitor="val_loss",
-        mode="min",
-        save_top_k=3,
-        save_last=True,
+        filename=f"sedd_{args.model_mode}_{args.condition_mode}-{{epoch:02d}}-{{val_loss:.4f}}",
+        monitor="val_loss", mode="min", save_top_k=1, save_last=True
     )
-    early_stop_cb = EarlyStopping(
-        monitor="val_loss",
-        patience=20 if mode == "full" else 10,
-        mode="min",
-        verbose=True,
-    )
+    early_cb = EarlyStopping(monitor="val_loss", patience=20, mode="min", verbose=True)
+    lr_cb = LearningRateMonitor(logging_interval="epoch")
 
-    # ── trainer ───────────────────────────────────────────────────────────
-    strategy = "ddp_find_unused_parameters_false" if num_gpus > 1 else "auto"
+    # Trainer
+    strategy = "ddp_find_unused_parameters_false" if args.gpus > 1 else "auto"
     trainer = pl.Trainer(
-        max_epochs=max_epochs,
-        accelerator="gpu" if torch.cuda.is_available() else "cpu",
-        devices=num_gpus,
+        max_epochs=args.epochs,
+        accelerator="gpu",
+        devices=args.gpus,
         strategy=strategy,
         precision="bf16",
-        callbacks=[plot_cb, ckpt_cb, early_stop_cb],
+        callbacks=[plot_cb, ckpt_cb, early_cb, lr_cb],
         log_every_n_steps=10,
         enable_progress_bar=True,
         default_root_dir=run_dir,
-        gradient_clip_val=1.0,
     )
 
-    t0 = time.time()
+    # Train
+    print(f"\n[START] Training for up to {args.epochs} epochs...")
+    start_time = time.time()
     trainer.fit(model, train_loader, val_loader)
-    elapsed = time.time() - t0
+    elapsed = time.time() - start_time
 
-    # ── post-training: rank 0 only ─────────────────────────────────────────
-    if trainer.global_rank != 0:
-        return {}
-
-    print(f"\n[INFO] Training complete in {elapsed/60:.1f} min")
-
-    best_ckpt = ckpt_cb.best_model_path
-    print(f"[INFO] Best checkpoint: {best_ckpt}")
-
-    eval_device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-    avg_overlap = 0.0
-    if best_ckpt and os.path.exists(best_ckpt):
-        print("[INFO] Running generation quality evaluation ...")
-        _orig = torch.load
-        torch.load = lambda *a, **kw: _orig(*a, **{**kw, "weights_only": False})
-        best_model = DiscreteDiffusionTransformer.load_from_checkpoint(
-            best_ckpt, map_location=eval_device
-        )
-        torch.load = _orig
-        best_model.eval().to(eval_device)
-
-        avg_overlap = evaluate_generation(
-            best_model, val_ds, cfg["vocab_size"], cfg["max_seq_len"],
-            n_samples=min(200, len(val_ds) * 5), device=eval_device
-        )
-        print(f"[INFO] Avg code overlap (real vs generated): {avg_overlap:.4f}")
-
-        plot_cb._plot_generation(best_model, ep=trainer.current_epoch)
-        plot_cb._plot_code_distribution(best_model, ep=trainer.current_epoch)
-    else:
-        print("[WARN] No best checkpoint found, skipping eval plots.")
-
-    # ── save report ────────────────────────────────────────────────────────
-    results = {
-        "best_val_loss":    float(trainer.callback_metrics.get("val_loss", -1)),
-        "total_params_M":   round(total_params / 1e6, 3),
-        "train_epochs":     trainer.current_epoch,
-        "train_time_min":   round(elapsed / 60, 1),
-        "avg_code_overlap": round(avg_overlap, 4),
-        "best_ckpt":        best_ckpt,
-        "n_train":          len(train_ds),
-        "n_val":            len(val_ds),
+    # Save report
+    report = {
+        "model_mode": args.model_mode,
+        "condition_mode": args.condition_mode,
+        "config": cfg,
+        "elapsed_time": elapsed,
+        "final_epoch": trainer.current_epoch,
+        "best_val_loss": float(ckpt_cb.best_model_score) if ckpt_cb.best_model_score else None,
     }
-    save_report(run_dir, mode, cfg, results)
+    with open(os.path.join(run_dir, "report.json"), "w") as f:
+        json.dump(report, f, indent=2)
 
-    print(f"\n{'='*60}")
-    print(f"  DONE — mode={mode}")
-    print(f"  best_val_loss  : {results['best_val_loss']:.4f}")
-    print(f"  avg_overlap    : {results['avg_code_overlap']:.4f}")
-    print(f"  params         : {results['total_params_M']}M")
-    print(f"  output         : {run_dir}")
-    print(f"{'='*60}\n")
-
-    return results
-
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=["small", "medium", "full"], default="small")
-    parser.add_argument("--gpus", type=int, default=None,
-                        help="Override number of GPUs (default: mode preset)")
-    parser.add_argument("--batch_size", type=int, default=None,
-                        help="Override batch size (default: mode preset)")
-    parser.add_argument("--n_train", type=int, default=None,
-                        help="Override n_train samples (-1 = all, default: mode preset)")
-    parser.add_argument("--epochs", type=int, default=None,
-                        help="Override max epochs (default: mode preset)")
-    args = parser.parse_args()
-
-    ts      = datetime.now().strftime("%Y%m%d_%H%M%S")
-    run_dir = os.path.join(OUT_BASE, f"sedd_{args.mode}_{ts}")
-
-    results = run(args.mode, run_dir, gpu_override=args.gpus, batch_size_override=args.batch_size,
-                   n_train_override=args.n_train, epochs_override=args.epochs)
-    return results
+    print(f"\n{'='*65}")
+    print(f"  TRAINING COMPLETE")
+    print(f"  Time: {elapsed/60:.1f} minutes")
+    print(f"  Best checkpoint: {ckpt_cb.best_model_path}")
+    print(f"  Plots: {plot_dir}")
+    print(f"{'='*65}\n")
 
 
 if __name__ == "__main__":

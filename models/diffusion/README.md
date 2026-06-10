@@ -2,44 +2,54 @@
 
 Discrete diffusion model for generating MeshGPT latent code sequences.
 
-## Quick Run
+## Quick Start
 
 ```bash
-# Train SEDD (small config, 1 GPU)
-python train_sedd.py --mode small --epochs 200 --gpus 1 --batch_size 16
+# Test (1 epoch, small model, conditional)
+python train_sedd.py --model_mode small --condition_mode conditional --epochs 1
 
-# Quick test (1 epoch)
-python train_sedd.py --mode small --epochs 1 --gpus 1 --batch_size 16
+# Full training (small model, conditional) - RECOMMENDED
+python train_sedd.py --model_mode small --condition_mode conditional --epochs 200
+
+# Unconditional training (optional comparison)
+python train_sedd.py --model_mode small --condition_mode unconditional --epochs 200
 ```
 
-## Config Changes
+## Required Data
 
-Edit `train_sedd.py` lines 25-50:
+`--data_dir` must contain:
+- `train_codes.pt` - Training tokens [N, 4096] with labels
+- `val_codes.pt` - Validation tokens [M, 4096] with labels
 
-```python
-SMALL_CFG = {
-    "vocab_size": 256,
-    "max_seq_len": 4096,
-    "d_model": 128,      # Model dimension
-    "nhead": 4,          # Attention heads
-    "num_layers": 3,     # Transformer layers
-    "num_classes": 40,
-    "learning_rate": 1e-4
-}
+Default: `trash/data/`
+
+## Arguments
+
+| Argument | Default | Description |
+|----------|---------|-------------|
+| `--model_mode` | `small` | Model size: small=128d, medium=256d, full=512d |
+| `--condition_mode` | `conditional` | Use class labels: conditional / unconditional |
+| `--epochs` | 200 | Training epochs |
+| `--batch_size` | 16 | Batch size per GPU (reduce if OOM) |
+| `--gpus` | 1 | Number of GPUs |
+| `--n_train` | -1 | Training samples (-1=all) |
+| `--n_val` | -1 | Validation samples (-1=all) |
+| `--data_dir` | `trash/data` | Path to train_codes.pt and val_codes.pt |
+| `--out_base` | `trash/sedd_runs` | Output directory base |
+
+## Outputs
+
 ```
-
-## Args
-
-- `--mode` - `small` (128d) / `medium` (256d) / `full` (512d)
-- `--epochs` - Training epochs (default: 200)
-- `--gpus` - Number of GPUs (default: 1)
-- `--batch_size` - Batch size (default: 16)
-- `--n_train` - Samples to use (-1 for all)
-
-## Output
-
-- Checkpoints: `trash/sedd_runs/<run_id>/checkpoints/`
-- Plots: Loss curves, generation histograms
+trash/sedd_runs/sedd_<model_mode>_<condition_mode>_<timestamp>/
+├── checkpoints/
+│   ├── sedd_...-best.ckpt    ← Best checkpoint
+│   └── sedd_...-last.ckpt    ← Last checkpoint
+├── plots/
+│   ├── curves_epXXXX.png     ← Training curves + perplexity
+│   ├── code_dist_epXXXX.png  ← Real vs generated code distribution
+│   └── gen_hist_epXXXX.png   ← Generated histograms per class
+└── report.json               ← Training summary
+```
 
 ## Overview
 
@@ -78,9 +88,8 @@ SEDD learns to generate discrete code sequences (extracted from MeshGPT VQ-VAE) 
 ```
 models/diffusion/
 ├── SEDD.py              # Core SEDD implementation
-├── train_sedd.py        # Training script with plotting
+├── train_sedd.py        # Training script (conditional + unconditional)
 ├── extract_fresh_codes.py  # Extract codes from VQVAE
-├── preprocessing.py     # ModelNet40 class names
 └── README.md
 ```
 
@@ -101,35 +110,32 @@ This generates:
 
 ### Step 2: Train SEDD
 
-**Small test (200 samples, 30 epochs)**:
+**Quick test (1 epoch)**:
 ```bash
-python train_sedd.py --mode small
+python train_sedd.py --model_mode small --condition_mode conditional --epochs 1
 ```
 
-**Medium test (1000 samples, 50 epochs)**:
+**Full training (recommended)**:
 ```bash
-python train_sedd.py --mode medium
+python train_sedd.py \
+    --model_mode small \
+    --condition_mode conditional \
+    --epochs 200 \
+    --n_train -1 \
+    --batch_size 16 \
+    --gpus 1
 ```
 
-**Full training (all samples, 200 epochs, 8 GPUs)**:
+**Custom paths**:
 ```bash
-python train_sedd.py --mode full
+python train_sedd.py \
+    --data_dir /path/to/data \
+    --out_base /path/to/output \
+    --model_mode small \
+    --condition_mode conditional \
+    --epochs 200
 ```
 
-## Outputs
-
-Training generates:
-```
-sedd_runs/<run_id>/
-├── checkpoints/
-│   └── sedd-epoch=XXXX-val_loss=X.XXXX.ckpt
-├── plots/
-│   ├── curves_epXXXX.png           # Training curves
-│   ├── gen_hist_epXXXX.png         # Generated code histograms
-│   └── code_dist_epXXXX.png        # Real vs generated distribution
-├── lightning_logs/
-└── report.json                      # Final metrics
-```
 
 ## Key Metrics
 
@@ -179,5 +185,14 @@ Then decode with MeshGPT decoder to get 3D shapes.
 
 - SEDD operates in the discrete latent space (256 codes)
 - Each shape is represented as 4096 code indices
-- Class conditioning enables controlled generation
+- **Conditional mode**: Uses class labels for controlled generation
+- **Unconditional mode**: Generates without class labels
 - Diffusion process: 1000 timesteps with cosine schedule
+
+## GPU Memory Guide
+
+| Model | VRAM | Use When |
+|-------|------|----------|
+| small (128d) | ~4GB | Your GPU (~11GB), testing |
+| medium (256d) | ~8GB | Balanced speed/quality |
+| full (512d) | ~20GB | Best quality, production |
