@@ -216,15 +216,39 @@ class EnhancedSEDDPlotCallback(Callback):
             return
 
         if ep % self.plot_every == 0:
+            plots_generated = []
             try:
                 self._plot_training_curves(ep)
-                self._plot_code_distribution(pl_module, ep)
-                self._plot_per_class_gen(pl_module, ep)
-                self._plot_token_entropy(pl_module, ep)
-                self._plot_code_heatmap(pl_module, ep)
-                print(f"[PlotCallback] Saved plots for epoch {ep} → {self.plot_dir}")
+                plots_generated.append("curves")
             except Exception as exc:
-                print(f"[PlotCallback] WARNING: {exc}")
+                print(f"[PlotCallback] ERROR in training_curves: {exc}")
+            
+            try:
+                self._plot_code_distribution(pl_module, ep)
+                plots_generated.append("code_dist")
+            except Exception as exc:
+                print(f"[PlotCallback] ERROR in code_distribution: {exc}")
+            
+            try:
+                self._plot_per_class_gen(pl_module, ep)
+                plots_generated.append("gen_hist")
+            except Exception as exc:
+                print(f"[PlotCallback] ERROR in per_class_gen: {exc}")
+            
+            try:
+                self._plot_token_entropy(pl_module, ep)
+                plots_generated.append("entropy")
+            except Exception as exc:
+                pass  # Optional plot
+            
+            try:
+                self._plot_code_heatmap(pl_module, ep)
+                plots_generated.append("heatmap")
+            except Exception as exc:
+                pass  # Optional plot
+            
+            if plots_generated:
+                print(f"[PlotCallback] Saved {', '.join(plots_generated)} plots for epoch {ep} → {self.plot_dir}")
 
     def _plot_training_curves(self, ep: int):
         """Publication-quality training curves with proper typography."""
@@ -277,25 +301,31 @@ class EnhancedSEDDPlotCallback(Callback):
         """Professional code distribution comparison: Real vs Generated."""
         device = next(model.parameters()).device
         
-        # Collect real codes from validation set
+        # Collect real codes from validation set (use CPU to save GPU memory)
         real_codes = []
-        n_samples = min(500, len(self.val_ds))
+        n_samples = min(200, len(self.val_ds))
         for i in range(n_samples):
             real_codes.append(self.val_ds[i]["input_ids"].numpy())
         real_hist = np.bincount(np.concatenate(real_codes), minlength=self.vocab_size).astype(float)
         real_hist /= real_hist.sum() + 1e-8
 
-        # Generate samples
-        n_gen = min(500, len(self.val_ds))
+        # Generate samples in smaller batches to prevent OOM
+        n_gen = min(100, len(self.val_ds))  # Reduced from 500 to 100
         cls_lbl = None
         if self.mode == "conditional" and hasattr(model, 'num_classes') and model.num_classes:
             cls_lbl = torch.randint(0, model.num_classes, (n_gen,), device=device)
         
+        model.eval()
         with torch.no_grad():
+            # Generate in single batch but with reduced size
             gen = model.generate(batch_size=n_gen, seq_len=self.seq_len,
                                 class_labels=cls_lbl, temperature=1.0, num_steps=50)
         gen_hist = np.bincount(gen.cpu().numpy().flatten(), minlength=self.vocab_size).astype(float)
         gen_hist /= gen_hist.sum() + 1e-8
+        
+        # Clear GPU cache
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
 
         # Compute overlap for annotation
         overlap = np.sum(np.minimum(real_hist, gen_hist))
@@ -390,6 +420,10 @@ class EnhancedSEDDPlotCallback(Callback):
                     fontsize=13, fontweight="bold", y=1.02)
         
         _save_figure(fig, os.path.join(self.plot_dir, f"gen_hist_ep{ep:04d}"), dpi=300)
+        
+        # Clear GPU cache
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
 
     def _plot_token_entropy(self, model, ep: int):
         """Token entropy analysis per class (simplified placeholder)."""
