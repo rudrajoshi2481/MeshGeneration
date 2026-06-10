@@ -50,6 +50,9 @@ sys.path.insert(0, SRC)
 sys.path.insert(0, SRC)
 from SEDD import DiscreteDiffusionTransformer, DiscreteNoiseSchedule
 
+# Add mesh_vqvae/src for preprocessing
+_BASE = os.path.dirname(os.path.dirname(SRC))
+sys.path.insert(0, os.path.join(_BASE, "mesh_vqvae", "src"))
 from preprocessing import MODELNET40_CLASSES
 
 # SRC = .../sementic_channel_project/MeshGeneration/diffusion_model
