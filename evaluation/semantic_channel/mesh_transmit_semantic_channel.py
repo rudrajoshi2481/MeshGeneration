@@ -44,13 +44,16 @@ _TRASH = os.path.join(os.path.dirname(_BASE), "trash")
 DIFFUSION = os.path.join(_BASE, "models", "diffusion")
 MESHVQVAE = os.path.join(_BASE, "mesh_vqvae", "src")
 CLASSIFIER = os.path.join(_BASE, "models", "classifier")
+AUTOREGRESSIVE = os.path.join(_BASE, "models", "autoregressive")
 
 sys.path.insert(0, DIFFUSION)
 sys.path.insert(0, MESHVQVAE)
 sys.path.insert(0, CLASSIFIER)
+sys.path.insert(0, AUTOREGRESSIVE)
 
 from SEDD import DiscreteDiffusionTransformer
 from train_classifier import TokenClassifier, TokenDataset
+from train_dot_mesh import NanoGpt
 
 # ── constants ─────────────────────────────────────────────────────────────────
 VOCAB_SIZE   = 256
@@ -405,8 +408,7 @@ def main():
     if args.dot_ckpt is not None:
         print(f"\n[INFO] Loading DoT model from {args.dot_ckpt} ...")
         try:
-            sys.path.insert(0, _HERE)  # semantic_channel/ — NanoGpt is inlined in train_dot_mesh
-            from train_dot_mesh import NanoGpt
+            _orig = torch.load
             torch.load = lambda *a, **kw: _orig(*a, **{**kw, "weights_only": False})
             try:
                 dot_model = NanoGpt.load_from_checkpoint(args.dot_ckpt, map_location=device)
@@ -417,6 +419,8 @@ def main():
             print(f"  ✓ DoT loaded: {sum(p.numel() for p in dot_model.parameters())/1e6:.2f}M params")
         except Exception as e:
             print(f"  ✗ DoT load failed: {e}")
+            import traceback
+            traceback.print_exc()
             dot_model = None
 
         if dot_model is not None:
