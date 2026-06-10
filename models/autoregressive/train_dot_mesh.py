@@ -275,10 +275,11 @@ class DoTPlotCallback(Callback):
         gen_codes = []
         
         if self.condition_mode == "conditional":
-            # Generate from each class
+            # Generate from each class (at least 1 sample per class, distribute evenly)
+            samples_per_class = max(1, n_gen_samples // NUM_CLASSES)
             for c in range(NUM_CLASSES):
                 cls_tok = torch.tensor([[BOS_TOKEN, BOS_TOKEN + c + 1]], dtype=torch.long, device=device)
-                for _ in range(n_gen_samples // NUM_CLASSES):
+                for _ in range(samples_per_class):
                     gen = model.generate(cls_tok, max_new_tokens=self.seq_len)
                     gen_codes.append(gen[0, 2:].cpu().numpy())  # Skip BOS + class
         else:
