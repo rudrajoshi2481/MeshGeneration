@@ -8,6 +8,7 @@ Trains a classifier on VQVAE token sequences to evaluate quality.
 python train_classifier.py \
     --tokens_path ../../trash/data/train_codes.pt \
     --mode conditional \
+    --out_dir ../../trash/classifier_run \
     --epochs 50 \
     --gpus 1
 ```
@@ -18,6 +19,7 @@ python train_classifier.py \
 python train_classifier.py \
     --tokens_path ../../trash/data/train_codes.pt \
     --mode conditional \
+    --out_dir ../../trash/classifier_test \
     --epochs 1 \
     --gpus 1 \
     --batch_size 64
@@ -42,6 +44,7 @@ model = TokenClassifier(
 
 - `--tokens_path` - Path to train_codes.pt
 - `--mode` - `conditional` or `unconditional`
+- `--out_dir` - **Required.** Output directory for checkpoints
 - `--epochs` - Training epochs (default: 50)
 - `--gpus` - Number of GPUs (default: 1)
 - `--batch_size` - Batch size (default: 64)
