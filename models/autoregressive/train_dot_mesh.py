@@ -222,7 +222,8 @@ class DoTPlotCallback(Callback):
             
             samples = torch.stack(all_samples)  # [n_cls, seq_len]
             n_plot = n_cls
-            titles = [f"Class {i}" for i in range(n_cls)]
+            # Use actual class names instead of just numbers
+            titles = [f"{MODELNET40_CLASSES[i]}" for i in range(n_cls)]
         else:
             # Unconditional: generate 10 samples from BOS only
             n_gen = 10
@@ -241,12 +242,15 @@ class DoTPlotCallback(Callback):
         axes = axes.flatten()
         for i in range(n_plot):
             codes = samples[i].numpy()
-            axes[i].hist(codes, bins=range(self.vocab_size + 1), color="#5B8DB8", alpha=0.85, edgecolor="white")
-            axes[i].set_title(titles[i], fontsize=10, fontweight='semibold')
-            axes[i].set_xlabel("Code ID", fontsize=9, labelpad=6)
-            axes[i].set_ylabel("Count", fontsize=9, labelpad=6)
-            axes[i].grid(True, alpha=0.3)
-        plt.suptitle(f"DoT Generated Code Histograms (epoch {ep})", fontsize=12, fontweight='bold', y=1.02)
+            # Darker blue color, remove white edges that make small bars invisible
+            axes[i].hist(codes, bins=range(self.vocab_size + 1), color="#2E5C8A", alpha=0.9, edgecolor="#1A3A5C", linewidth=0.5)
+            axes[i].set_title(titles[i], fontsize=9, fontweight='bold', pad=8)
+            axes[i].set_xlabel("Code ID", fontsize=8, labelpad=4)
+            axes[i].set_ylabel("Count", fontsize=8, labelpad=4)
+            axes[i].grid(True, alpha=0.3, linestyle='--', linewidth=0.5)
+            axes[i].set_facecolor('#FAFAFA')  # Light gray background
+        mode_str = "Conditional" if self.condition_mode == "conditional" else "Unconditional"
+        plt.suptitle(f"DoT {mode_str} Generation — Epoch {ep}", fontsize=13, fontweight='bold', y=0.995)
         plt.tight_layout()
         plt.savefig(os.path.join(self.plot_dir, f"gen_hist_ep{ep:04d}.png"), dpi=150, facecolor="white")
         plt.close()
@@ -266,8 +270,8 @@ class DoTPlotCallback(Callback):
         real_hist = np.bincount(real_codes, minlength=self.vocab_size).astype(float)
         real_hist /= real_hist.sum() + 1e-8
 
-        # Generated distribution
-        n_gen_samples = 50
+        # Generated distribution (reduce sample count to prevent long plotting times)
+        n_gen_samples = 20
         gen_codes = []
         
         if self.condition_mode == "conditional":
@@ -290,21 +294,23 @@ class DoTPlotCallback(Callback):
 
         fig, ax = plt.subplots(figsize=(12, 4))
         x = np.arange(self.vocab_size)
-        ax.bar(x, real_hist, alpha=0.6, label="Real", color="#5B8DB8", width=1.0)
-        ax.bar(x, gen_hist,  alpha=0.6, label="Generated", color="#F4A35A", width=1.0)
+        # Darker, more saturated colors for better visibility
+        ax.bar(x, real_hist, alpha=0.75, label="Real", color="#1E5A8E", width=1.0, edgecolor="#0D3A5C", linewidth=0.3)
+        ax.bar(x, gen_hist,  alpha=0.75, label="Generated", color="#D47828", width=1.0, edgecolor="#A05010", linewidth=0.3)
         ax.set_xlabel("Code ID", fontsize=11, labelpad=8)
         ax.set_ylabel("Frequency", fontsize=11, labelpad=8)
-        title = f"DoT ({self.condition_mode}): Real vs Generated Code Distribution (epoch {ep})"
+        title = f"DoT ({self.condition_mode}): Real vs Generated Code Distribution (Epoch {ep})"
         ax.set_title(title, fontsize=12, fontweight='bold')
-        ax.legend(frameon=True, framealpha=0.9, edgecolor="#CCCCCC")
-        ax.grid(True, alpha=0.3)
+        ax.legend(frameon=True, framealpha=0.95, edgecolor="#999999", loc='upper right')
+        ax.grid(True, alpha=0.3, linestyle='--', linewidth=0.5)
+        ax.set_facecolor('#FAFAFA')
         
         # Compute and display overlap
         overlap = np.sum(np.minimum(real_hist, gen_hist))
-        ax.text(0.02, 0.98, f"Distribution Overlap: {overlap:.3f}",
+        ax.text(0.02, 0.98, f"Overlap: {overlap:.3f}",
                transform=ax.transAxes, fontsize=10, verticalalignment="top",
-               bbox=dict(boxstyle="round,pad=0.3", facecolor="white", 
-                        edgecolor="#333333", alpha=0.9))
+               bbox=dict(boxstyle="round,pad=0.4", facecolor="#FFF8E7", 
+                        edgecolor="#D47828", alpha=0.95, linewidth=1.5))
         
         plt.tight_layout()
         plt.savefig(os.path.join(self.plot_dir, f"code_dist_ep{ep:04d}.png"), dpi=150, facecolor="white")
