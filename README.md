@@ -24,6 +24,8 @@ python run_all.py
 
 ## Pipeline Overview
 
+![Pipeline Diagram](image.png)
+
 ```
 3D Mesh → VQ-VAE → Tokens → [Classifier | SEDD | DoT] → Evaluation
 ```
