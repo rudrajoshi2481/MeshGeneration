@@ -36,6 +36,7 @@ python mesh_transmit_semantic_channel.py \
 |--------|---------|
 | `generate_tokens.py` | Generate tokens from SEDD |
 | `generate_tokens_parallel.py` | Multi-GPU generation |
+| `decode_generated_tokens.py` | Decode tokens → 3D meshes (verify quality) |
 | `semantic_channel/mesh_transmit_semantic_channel.py` | Puncture + refill testing |
 | `semantic_channel/run_all.py` | Full pipeline runner |
 
@@ -55,7 +56,25 @@ python mesh_transmit_semantic_channel.py \
 - `--sedd_steps` - Diffusion steps (default: 50)
 - `--skip_dot_full_gen` - Skip slow DoT full generation
 
+### decode_generated_tokens.py
+- `--tokens_path` - Path to generated tokens .pt file
+- `--vqvae_ckpt` - VQVAE checkpoint path
+- `--out_dir` - Output directory for meshes
+- `--n_samples` - Number to decode
+- `--save_ply` - Also save as .ply files
+
+**Example:**
+```bash
+# Decode SEDD generated tokens to verify quality
+python decode_generated_tokens.py \
+    --tokens_path trash/sedd_generated/tokens.pt \
+    --vqvae_ckpt trash/vqvae/checkpoints/best.ckpt \
+    --out_dir trash/decoded_meshes \
+    --n_samples 10
+```
+
 ## Output
 
 - Results: `trash/semantic_channel_results/`
 - Plots: Accuracy vs missing % curves
+- Decoded meshes: `trash/decoded_meshes/` (PNG + optional PLY)

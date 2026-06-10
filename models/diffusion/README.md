@@ -55,11 +55,11 @@ SEDD learns to generate discrete code sequences (extracted from MeshGPT VQ-VAE) 
 
 ## Model Configurations
 
-### Small (Quick Test)
-- d_model: 256
-- num_layers: 4
+### Small (Your Config)
+- d_model: 128
+- num_layers: 3
 - nhead: 4
-- Parameters: ~5M
+- Parameters: ~1.8M
 
 ### Medium
 - d_model: 384
@@ -76,10 +76,11 @@ SEDD learns to generate discrete code sequences (extracted from MeshGPT VQ-VAE) 
 ## Directory Structure
 
 ```
-diffusion_model/
+models/diffusion/
 ├── SEDD.py              # Core SEDD implementation
 ├── train_sedd.py        # Training script with plotting
-├── preprocessing.py     # ModelNet40 class names (for plotting)
+├── extract_fresh_codes.py  # Extract codes from VQVAE
+├── preprocessing.py     # ModelNet40 class names
 └── README.md
 ```
 
@@ -88,13 +89,13 @@ diffusion_model/
 ### Step 1: Extract MeshGPT Codes
 First, train MeshGPT and extract discrete codes:
 ```bash
-cd ../mesh_vqvae
-python extract_codes.py --ckpt path/to/meshgpt.ckpt --out_dir ./codes
+cd ../mesh_vqvae/src
+python extract_fresh_codes.py --ckpt <path/to/checkpoint> --out_dir ../../trash/data
 ```
 
 This generates:
-- `train_codes.pt`: [2720, 4096] codes
-- `val_codes.pt`: [480, 4096] codes
+- `train_codes.pt`: [~6400, 4096] codes (depends on split)
+- `val_codes.pt`: [~1600, 4096] codes
 
 ### Step 2: Train SEDD
 

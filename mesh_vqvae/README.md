@@ -43,7 +43,7 @@ class SmallModelConfig:
 ## Output
 
 - Checkpoints: `runs/<run_name>/checkpoints/`
-- Logs: TensorBoard + CSV
+- Logs: CSVLogger + plots/
 - Codes: `trash/data/train_codes.pt` + `val_codes.pt`
 
 ## Architecture
@@ -87,7 +87,6 @@ mesh_vqvae/
 ├── training_scripts/
 │   ├── train_with_classifier.py    # Full model (1.91M params)
 │   └── train_without_classifier.py # Pure VQ-VAE (1.44M params)
-└── extract_codes.py       # Extract discrete codes for SEDD training
 ```
 
 ## Training
@@ -130,7 +129,7 @@ python train_without_classifier.py --quick
 ## Extract Codes for Diffusion
 
 ```bash
-python extract_codes.py --ckpt path/to/checkpoint.ckpt --out_dir ./codes
+python src/extract_fresh_codes.py --ckpt <path/to/checkpoint.ckpt> --out_dir ../../trash/data
 ```
 
 Outputs:
