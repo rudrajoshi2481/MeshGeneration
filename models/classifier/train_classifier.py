@@ -22,6 +22,9 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+import seaborn as sns
+from sklearn.metrics import confusion_matrix, classification_report
+from collections import defaultdict
 
 # Add paths
 _HERE = os.path.dirname(os.path.abspath(__file__))  # models/classifier/
@@ -79,8 +82,14 @@ class TokenClassifier(pl.LightningModule):
         
         self.train_acc = []
         self.val_acc = []
+        self.train_losses = []
+        self.val_losses = []
         self.val_preds = []
         self.val_labels = []
+        # Temporary storage for per-batch metrics (averaged at epoch end)
+        self._epoch_train_accs = []
+        self._epoch_train_losses = []
+        self._epoch_val_losses = []
     
     def forward(self, tokens):
         # tokens: [B, seq_len]
@@ -96,7 +105,19 @@ class TokenClassifier(pl.LightningModule):
         
         self.log("train_loss", loss, prog_bar=True, sync_dist=True)
         self.log("train_acc", acc, prog_bar=True, sync_dist=True)
+        
+        # Store for epoch-level averaging
+        self._epoch_train_accs.append(acc.item())
+        self._epoch_train_losses.append(loss.item())
         return loss
+    
+    def on_train_epoch_end(self):
+        # Average and store per-epoch metrics
+        if len(self._epoch_train_accs) > 0:
+            self.train_acc.append(np.mean(self._epoch_train_accs))
+            self.train_losses.append(np.mean(self._epoch_train_losses))
+            self._epoch_train_accs.clear()
+            self._epoch_train_losses.clear()
     
     def validation_step(self, batch, batch_idx):
         logits = self(batch["tokens"])
@@ -109,6 +130,7 @@ class TokenClassifier(pl.LightningModule):
         # Store for confusion matrix
         self.val_preds.append(logits.argmax(dim=1).cpu())
         self.val_labels.append(batch["label"].cpu())
+        self._epoch_val_losses.append(loss.item())
         return loss
     
     def on_validation_epoch_end(self):
@@ -117,6 +139,10 @@ class TokenClassifier(pl.LightningModule):
             labels = torch.cat(self.val_labels)
             acc = (preds == labels).float().mean().item()
             self.val_acc.append(acc)
+            # Store average val loss for this epoch
+            if len(self._epoch_val_losses) > 0:
+                self.val_losses.append(np.mean(self._epoch_val_losses))
+                self._epoch_val_losses.clear()
             self.val_preds.clear()
             self.val_labels.clear()
     
@@ -124,20 +150,138 @@ class TokenClassifier(pl.LightningModule):
         return torch.optim.AdamW(self.parameters(), lr=self.hparams.lr, weight_decay=0.01)
 
 
-def plot_training_curves(train_acc, val_acc, save_path):
-    fig, ax = plt.subplots(figsize=(10, 5), constrained_layout=True)
-    epochs = np.arange(len(val_acc))
+def plot_training_curves(train_acc, val_acc, train_losses=None, val_losses=None, save_path="training_curves.png"):
+    """Plot comprehensive training curves with both accuracy and loss."""
+    has_loss = train_losses is not None and val_losses is not None and len(train_losses) > 0 and len(val_losses) > 0
     
-    ax.plot(epochs, val_acc, color=PALETTE[0], lw=2, label="val_acc", marker='o', markersize=4)
-    ax.set_xlabel("Epoch", labelpad=8)
-    ax.set_ylabel("Accuracy", labelpad=8)
-    ax.set_title("Token Classifier Training", fontsize=13, fontweight="bold", pad=10)
-    ax.legend(frameon=True, framealpha=0.9, edgecolor="#CCCCCC")
-    ax.grid(True, alpha=0.3)
-    ax.set_ylim([0, 1.05])
+    if has_loss:
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5), constrained_layout=True)
+    else:
+        fig, ax1 = plt.subplots(figsize=(10, 5), constrained_layout=True)
+        ax2 = None
+    
+    # Handle mismatched lengths (train/val may have different number of epochs recorded)
+    n_epochs = min(len(train_acc), len(val_acc))
+    if len(train_acc) != len(val_acc):
+        print(f"[WARN] Mismatched lengths: train_acc={len(train_acc)}, val_acc={len(val_acc)}, using first {n_epochs} epochs")
+    
+    epochs = np.arange(n_epochs)
+    train_acc_plot = train_acc[:n_epochs]
+    val_acc_plot = val_acc[:n_epochs]
+    
+    # Accuracy plot
+    ax1.plot(epochs, train_acc_plot, color=PALETTE[0], lw=2, label="train_acc", marker='o', markersize=4)
+    ax1.plot(epochs, val_acc_plot, color=PALETTE[1], lw=2, label="val_acc", marker='s', markersize=4)
+    ax1.set_xlabel("Epoch", labelpad=8)
+    ax1.set_ylabel("Accuracy", labelpad=8)
+    ax1.set_title("Token Classifier - Accuracy", fontsize=13, fontweight="bold", pad=10)
+    ax1.legend(frameon=True, framealpha=0.9, edgecolor="#CCCCCC")
+    ax1.grid(True, alpha=0.3)
+    ax1.set_ylim([0, 1.05])
+    
+    # Loss plot (if available)
+    if ax2 is not None:
+        n_epochs_loss = min(len(train_losses), len(val_losses))
+        epochs_loss = np.arange(n_epochs_loss)
+        ax2.plot(epochs_loss, train_losses[:n_epochs_loss], color=PALETTE[0], lw=2, label="train_loss", marker='o', markersize=4)
+        ax2.plot(epochs_loss, val_losses[:n_epochs_loss], color=PALETTE[1], lw=2, label="val_loss", marker='s', markersize=4)
+        ax2.set_xlabel("Epoch", labelpad=8)
+        ax2.set_ylabel("Loss", labelpad=8)
+        ax2.set_title("Token Classifier - Loss", fontsize=13, fontweight="bold", pad=10)
+        ax2.legend(frameon=True, framealpha=0.9, edgecolor="#CCCCCC")
+        ax2.grid(True, alpha=0.3)
     
     fig.savefig(save_path, dpi=200, bbox_inches="tight", facecolor="white")
     plt.close(fig)
+    print(f"[PLOT] Saved training curves to {save_path}")
+
+
+def plot_confusion_matrix(y_true, y_pred, class_names, save_path="confusion_matrix.png"):
+    """Plot normalized confusion matrix."""
+    cm = confusion_matrix(y_true, y_pred)
+    cm_norm = cm.astype('float') / (cm.sum(axis=1)[:, np.newaxis] + 1e-8)
+    
+    # For 40 classes, show subset or use smaller font
+    n_classes = len(class_names)
+    figsize = (20, 18) if n_classes > 20 else (14, 12)
+    
+    fig, ax = plt.subplots(figsize=figsize, constrained_layout=True)
+    
+    sns.heatmap(cm_norm, annot=False, cmap='Blues', 
+                xticklabels=class_names, yticklabels=class_names,
+                cbar_kws={'label': 'Normalized Frequency'}, ax=ax)
+    
+    ax.set_xlabel("Predicted Class", fontsize=12, labelpad=10)
+    ax.set_ylabel("True Class", fontsize=12, labelpad=10)
+    ax.set_title("Confusion Matrix (Normalized)", fontsize=14, fontweight="bold", pad=12)
+    
+    # Rotate labels for readability
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+    plt.setp(ax.get_yticklabels(), rotation=0)
+    
+    fig.savefig(save_path, dpi=200, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    print(f"[PLOT] Saved confusion matrix to {save_path}")
+
+
+def plot_per_class_accuracy(y_true, y_pred, class_names, save_path="per_class_accuracy.png"):
+    """Plot per-class accuracy bar chart."""
+    cm = confusion_matrix(y_true, y_pred)
+    per_class_acc = cm.diagonal() / (cm.sum(axis=1) + 1e-8)
+    
+    # Sort by accuracy
+    sorted_idx = np.argsort(per_class_acc)[::-1]
+    sorted_acc = per_class_acc[sorted_idx]
+    sorted_names = [class_names[i] if i < len(class_names) else f"Class {i}" for i in sorted_idx]
+    
+    # Create color map based on accuracy
+    colors = [PALETTE[2] if acc > 0.7 else PALETTE[0] if acc > 0.5 else PALETTE[3] for acc in sorted_acc]
+    
+    fig, ax = plt.subplots(figsize=(16, 10), constrained_layout=True)
+    bars = ax.barh(range(len(sorted_acc)), sorted_acc, color=colors, edgecolor='white', linewidth=0.5)
+    
+    # Add value labels
+    for i, (bar, acc) in enumerate(zip(bars, sorted_acc)):
+        ax.text(acc + 0.01, i, f"{acc:.2f}", va='center', fontsize=8)
+    
+    ax.set_yticks(range(len(sorted_names)))
+    ax.set_yticklabels(sorted_names, fontsize=8)
+    ax.set_xlabel("Accuracy", fontsize=12, labelpad=8)
+    ax.set_ylabel("Class", fontsize=12, labelpad=8)
+    ax.set_title("Per-Class Accuracy (Sorted)", fontsize=14, fontweight="bold", pad=12)
+    ax.set_xlim([0, 1.05])
+    ax.grid(True, axis='x', alpha=0.3)
+    
+    # Add legend
+    from matplotlib.patches import Patch
+    legend_elements = [
+        Patch(facecolor=PALETTE[2], label='High (>70%)'),
+        Patch(facecolor=PALETTE[0], label='Medium (50-70%)'),
+        Patch(facecolor=PALETTE[3], label='Low (<50%)')
+    ]
+    ax.legend(handles=legend_elements, loc='lower right', frameon=True, framealpha=0.9)
+    
+    fig.savefig(save_path, dpi=200, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    print(f"[PLOT] Saved per-class accuracy to {save_path}")
+
+
+def generate_classification_report(y_true, y_pred, class_names, save_path="classification_report.txt"):
+    """Save detailed classification report to text file."""
+    # Get unique labels present in the data
+    unique_labels = sorted(set(y_true) | set(y_pred))
+    # Filter class_names to only include present labels
+    present_class_names = [class_names[i] if i < len(class_names) else f"Class_{i}" for i in unique_labels]
+    
+    report = classification_report(y_true, y_pred, labels=unique_labels, target_names=present_class_names, digits=3)
+    with open(save_path, 'w') as f:
+        f.write("=" * 60 + "\n")
+        f.write("Classification Report - Token Classifier\n")
+        f.write("=" * 60 + "\n")
+        f.write(f"Classes present: {len(unique_labels)}/{len(class_names)}\n\n")
+        f.write(report)
+        f.write("\n" + "=" * 60 + "\n")
+    print(f"[REPORT] Saved classification report to {save_path}")
 
 
 def main():
@@ -213,24 +357,80 @@ def main():
     # Train
     trainer.fit(model, train_loader, val_loader)
     
-    # Plot
+    # Plot and evaluate
     if trainer.global_rank == 0:
-        plot_training_curves(model.train_acc, model.val_acc,
-                            os.path.join(plot_dir, "training_curves.png"))
+        print("\n" + "="*60)
+        print("  Generating comprehensive plots and evaluation...")
+        print("="*60)
         
-        # Save results
+        # 1. Training curves with loss and accuracy
+        plot_training_curves(
+            model.train_acc, model.val_acc,
+            model.train_losses, model.val_losses,
+            os.path.join(plot_dir, "training_curves.png")
+        )
+        
+        # 2. Run final evaluation on full validation set for confusion matrix
+        print("[INFO] Running final evaluation on validation set...")
+        model.eval()
+        all_preds = []
+        all_labels = []
+        
+        with torch.no_grad():
+            for batch in val_loader:
+                logits = model(batch["tokens"].to(model.device))
+                preds = logits.argmax(dim=1).cpu()
+                labels = batch["label"]
+                all_preds.append(preds)
+                all_labels.append(labels)
+        
+        all_preds = torch.cat(all_preds).numpy()
+        all_labels = torch.cat(all_labels).numpy()
+        
+        # 3. Confusion matrix
+        plot_confusion_matrix(
+            all_labels, all_preds,
+            MODELNET40_CLASSES,
+            os.path.join(plot_dir, "confusion_matrix.png")
+        )
+        
+        # 4. Per-class accuracy
+        plot_per_class_accuracy(
+            all_labels, all_preds,
+            MODELNET40_CLASSES,
+            os.path.join(plot_dir, "per_class_accuracy.png")
+        )
+        
+        # 5. Classification report (text)
+        generate_classification_report(
+            all_labels, all_preds,
+            MODELNET40_CLASSES,
+            os.path.join(args.out_dir, "classification_report.txt")
+        )
+        
+        # 6. Save results
+        final_acc = (all_preds == all_labels).mean()
         results = {
             "mode": args.mode,
-            "final_val_acc": float(model.val_acc[-1]) if model.val_acc else 0.0,
+            "final_val_acc": float(final_acc),
             "best_val_acc": float(max(model.val_acc)) if model.val_acc else 0.0,
             "n_train": len(train_ds),
             "n_val": len(val_ds),
             "best_ckpt": ckpt_cb.best_model_path,
+            "plots_dir": plot_dir,
+            "plots_generated": [
+                "training_curves.png",
+                "confusion_matrix.png",
+                "per_class_accuracy.png",
+                "classification_report.txt"
+            ]
         }
         with open(os.path.join(args.out_dir, "results.json"), "w") as f:
             json.dump(results, f, indent=2)
         
-        print(f"\n[DONE] Best val_acc: {results['best_val_acc']:.4f}")
+        print(f"\n[DONE] Final val_acc: {final_acc:.4f}")
+        print(f"[DONE] Best val_acc: {results['best_val_acc']:.4f}")
+        print(f"[DONE] Plots → {plot_dir}/")
         print(f"[DONE] Results → {args.out_dir}/results.json")
 
 

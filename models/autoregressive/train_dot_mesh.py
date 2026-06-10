@@ -25,7 +25,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader, Subset
 import pytorch_lightning as pl
-from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
+from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping, Callback
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
@@ -127,6 +127,125 @@ class _TransformerModel(nn.Module):
             probs = F.softmax(logits, dim=-1)
             idx = torch.cat((idx, torch.multinomial(probs, 1)), dim=1)
         return idx
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Plotting callback
+# ─────────────────────────────────────────────────────────────────────────────
+
+class DoTPlotCallback(Callback):
+    """Logs training curves and generation samples every N epochs for DoT."""
+
+    def __init__(self, plot_dir: str, val_dataset, vocab_size: int,
+                 seq_len: int, plot_every: int = 5, n_gen: int = 8):
+        self.plot_dir   = plot_dir
+        self.val_ds     = val_dataset
+        self.vocab_size = vocab_size
+        self.seq_len    = seq_len
+        self.plot_every = plot_every
+        self.n_gen      = n_gen
+        os.makedirs(plot_dir, exist_ok=True)
+
+        self.train_losses = []
+        self.val_losses   = []
+        self.epochs       = []
+
+    def on_train_epoch_end(self, trainer, pl_module):
+        ep = trainer.current_epoch
+        tl = float(trainer.callback_metrics.get("train_loss", 0))
+        vl = float(trainer.callback_metrics.get("val_loss", 0))
+        self.train_losses.append(tl)
+        self.val_losses.append(vl)
+        self.epochs.append(ep)
+
+        if ep % self.plot_every == 0:
+            self._plot_curves(ep)
+            self._plot_generation(pl_module, ep)
+            self._plot_code_distribution(pl_module, ep)
+
+    def _plot_curves(self, ep: int):
+        fig, ax = plt.subplots(figsize=(9, 4))
+        ax.plot(self.epochs, self.train_losses, label="train_loss", color="#5B8DB8", linewidth=2)
+        ax.plot(self.epochs, self.val_losses,   label="val_loss", color="#F4A35A", linewidth=2)
+        ax.set_xlabel("Epoch", fontsize=11, labelpad=8)
+        ax.set_ylabel("Loss", fontsize=11, labelpad=8)
+        ax.set_title("DoT Training Curves", fontsize=13, fontweight='bold', pad=10)
+        ax.legend(frameon=True, framealpha=0.9, edgecolor="#CCCCCC")
+        ax.grid(True, alpha=0.3)
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.plot_dir, f"curves_ep{ep:04d}.png"), dpi=150, facecolor="white")
+        plt.close()
+
+    @torch.no_grad()
+    def _plot_generation(self, model, ep: int):
+        """Generate samples and plot code histograms."""
+        device = next(model.parameters()).device
+        n_cls  = min(10, NUM_CLASSES)
+        # Generate one sample per class
+        prompts = []
+        for c in range(n_cls):
+            cls_tok = torch.tensor([[BOS_TOKEN, BOS_TOKEN + c + 1]], dtype=torch.long, device=device)
+            prompts.append(cls_tok)
+        
+        all_samples = []
+        for prompt in prompts:
+            gen = model.generate(prompt, max_new_tokens=self.seq_len)
+            all_samples.append(gen[0, 2:].cpu())  # Remove BOS and class token
+        
+        samples = torch.stack(all_samples)  # [n_cls, seq_len]
+
+        fig, axes = plt.subplots(2, 5, figsize=(18, 7))
+        axes = axes.flatten()
+        for i in range(n_cls):
+            codes = samples[i].numpy()
+            axes[i].hist(codes, bins=range(self.vocab_size + 1), color="#5B8DB8", alpha=0.85, edgecolor="white")
+            axes[i].set_title(f"Class {i}", fontsize=10, fontweight='semibold')
+            axes[i].set_xlabel("Code ID", fontsize=9, labelpad=6)
+            axes[i].set_ylabel("Count", fontsize=9, labelpad=6)
+            axes[i].grid(True, alpha=0.3)
+        plt.suptitle(f"DoT Generated Code Histograms (epoch {ep})", fontsize=12, fontweight='bold', y=1.02)
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.plot_dir, f"gen_hist_ep{ep:04d}.png"), dpi=150, facecolor="white")
+        plt.close()
+
+    @torch.no_grad()
+    def _plot_code_distribution(self, model, ep: int):
+        """Compare real vs generated code usage distribution."""
+        device = next(model.parameters()).device
+
+        # Real distribution from validation set
+        real_codes = []
+        for i in range(min(100, len(self.val_ds))):
+            x, _ = self.val_ds[i]
+            real_codes.append(x[2:].numpy())  # Skip BOS and class tokens
+        real_codes = np.concatenate(real_codes)
+        real_hist = np.bincount(real_codes, minlength=self.vocab_size).astype(float)
+        real_hist /= real_hist.sum() + 1e-8
+
+        # Generated distribution
+        n_gen_samples = 50
+        gen_codes = []
+        for c in range(NUM_CLASSES):
+            cls_tok = torch.tensor([[BOS_TOKEN, BOS_TOKEN + c + 1]], dtype=torch.long, device=device)
+            for _ in range(n_gen_samples // NUM_CLASSES):
+                gen = model.generate(cls_tok, max_new_tokens=self.seq_len)
+                gen_codes.append(gen[0, 2:].cpu().numpy())
+        gen_codes = np.concatenate(gen_codes)
+        gen_hist = np.bincount(gen_codes, minlength=self.vocab_size).astype(float)
+        gen_hist /= gen_hist.sum() + 1e-8
+
+        fig, ax = plt.subplots(figsize=(12, 4))
+        x = np.arange(self.vocab_size)
+        ax.bar(x, real_hist, alpha=0.6, label="Real", color="#5B8DB8", width=1.0)
+        ax.bar(x, gen_hist,  alpha=0.6, label="Generated", color="#F4A35A", width=1.0)
+        ax.set_xlabel("Code ID", fontsize=11, labelpad=8)
+        ax.set_ylabel("Frequency", fontsize=11, labelpad=8)
+        ax.set_title(f"DoT: Real vs Generated Code Distribution (epoch {ep})", fontsize=12, fontweight='bold')
+        ax.legend(frameon=True, framealpha=0.9, edgecolor="#CCCCCC")
+        ax.grid(True, alpha=0.3)
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.plot_dir, f"code_dist_ep{ep:04d}.png"), dpi=150, facecolor="white")
+        plt.close()
 
 
 class NanoGpt(pl.LightningModule):
@@ -240,11 +359,17 @@ def main():
         cfg["batch_size"] = args.batch_size
     run_id = datetime.now().strftime("dot_run_%Y%m%d_%H%M%S")
     out_dir = os.path.join(args.out_base, run_id)
+    plot_dir = os.path.join(out_dir, "plots")
     os.makedirs(out_dir, exist_ok=True)
+    os.makedirs(plot_dir, exist_ok=True)
+
+    # Plot frequency based on mode
+    plot_every = 5 if args.mode == "small" else 10
 
     print(f"\n{'='*60}")
     print(f"  DoT Training — {args.mode.upper()} mode")
     print(f"  Output → {out_dir}")
+    print(f"  Plots  → {plot_dir} (every {plot_every} epochs)")
     print(f"{'='*60}\n")
 
     # ── Datasets ────────────────────────────────────────────────────────────
@@ -273,6 +398,13 @@ def main():
     print(f"[INFO] Model params: {sum(p.numel() for p in model.parameters())/1e6:.2f}M")
 
     # ── Callbacks ────────────────────────────────────────────────────────────
+    plot_cb = DoTPlotCallback(
+        plot_dir=plot_dir,
+        val_dataset=val_ds,
+        vocab_size=VOCAB_SIZE,
+        seq_len=SEQ_LEN,
+        plot_every=plot_every,
+    )
     ckpt_cb = ModelCheckpoint(
         dirpath=os.path.join(out_dir, "checkpoints"),
         filename="dot-{epoch:02d}-{val_loss:.4f}",
@@ -288,7 +420,7 @@ def main():
         devices      = args.gpus,
         strategy     = strategy,
         precision    = "bf16-mixed",
-        callbacks    = [ckpt_cb, early_stop],
+        callbacks    = [plot_cb, ckpt_cb, early_stop],
         default_root_dir = out_dir,
         log_every_n_steps = 10,
     )
